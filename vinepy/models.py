@@ -1,6 +1,8 @@
 import json
 from datetime import datetime
 
+from errors import *
+
 def strptime(string, fmt='%Y-%m-%dT%H:%M:%S.%f'):
     return datetime.strptime(string, fmt)
 
@@ -89,7 +91,10 @@ class MetaModelCollection(Model):
             return self.get_collection().__getitem__(descriptor)
 
     def __iter__(self):
-        self.get_collection().__iter__()
+        return self.get_collection().__iter__()
+
+    def __repr__(self):
+        return self.get_collection().__repr__()
 
     def next(self):
         return self.get_collection().next()
@@ -97,6 +102,15 @@ class MetaModelCollection(Model):
     def get_collection(self):
         return self.get(self.model_key, [])
 
+# User decorator
+def only_me(fn):
+    def _decorator(self, *args, **kwargs):
+        if('key' in self.keys()):
+            return fn(self, *args, **kwargs)
+        else:
+            # raise VineError(4, "You don't have permission to access that record.")
+            raise VineError(1337, "Only %s can access this record." % self)
+    return _decorator
 
 class User(Model):
     @classmethod
@@ -111,13 +125,59 @@ class User(Model):
 
         return self
 
+    def __repr__(self):
+        return "User[%s:%s]" % (self.id, self.username)
+
     def connect_api(self, api):
         self.api = api
         if('key' in self.keys()):
             self.api.authenticate(self)
 
+    def follow(self, **kwargs):
+        return self.api.follow(user_id=self.id, **kwargs)
+
+    def unfollow(self, **kwargs):
+        return self.api.unfollow(user_id=self.id, **kwargs)
+
+    def block(self, **kwargs):
+        return self.api.block(user_id=self.id, **kwargs)
+
+    def unblock(self, **kwargs):
+        return self.api.unblock(user_id=self.id, **kwargs)
+
     def followers(self, **kwargs):
         return self.api.get_followers(user_id=self.id, **kwargs)
+
+    def following(self, **kwargs):
+        return self.api.get_following(user_id=self.id, **kwargs)
+
+    def timeline(self, **kwargs):
+        return self.api.get_user_timeline(user_id=self.id, **kwargs)
+
+    def likes(self, **kwargs):
+        return self.api.get_user_likes(user_id=self.id, **kwargs)
+
+    @only_me
+    def pending_notifications_count(self, **kwargs):
+        # if('key' in self.keys()):
+        return self.api.get_pending_notifications_count(user_id=self.id, **kwargs)
+
+    @only_me
+    def notifications(self, **kwargs):
+        # if('key' in self.keys()):
+        return self.api.get_notifications(user_id=self.id, **kwargs)
+
+    @only_me
+    def update(self, **kwargs):
+        return self.api.update_user(user_id=self.id, **kwargs)
+
+    @only_me
+    def set_explicit(self, **kwargs):
+        return self.api.set_explicit(user_id=self.id, **kwargs)
+
+    @only_me
+    def unset_explicit(self, **kwargs):
+        return self.api.unset_explicit(user_id=self.id, **kwargs)
 
 
 class Post(Model):
@@ -149,6 +209,28 @@ class Post(Model):
 
         return self
 
+    def __repr__(self):
+        chars = 10
+        return 'Post[%s:%s]' % (self.id, self.description[:chars] + (self.description[chars:] and '...'))
+
+    def like(self, **kwargs):
+        return self.api.like(post_id=self.id, **kwargs)
+
+    def unlike(self, **kwargs):
+        return self.api.unlike(post_id=self.id, **kwargs)
+
+    def revine(self, **kwargs):
+        return self.api.revine(post_id=self.id, **kwargs)
+
+    def comment(self, **kwargs):
+        return self.api.comment(post_id=self.id, **kwargs)
+
+    # def uncomment(self, **kwargs):
+    #     return self.api.comment(post_id=self.id, **kwargs)
+
+    def report(self, **kwargs):
+        return self.api.report(post_id=self.id, **kwargs)
+
 
 class Comment(Model):
     @classmethod
@@ -170,6 +252,13 @@ class Comment(Model):
 
         return self
 
+    def __repr__(self):
+        chars = 10
+        return 'Comment[[%s:%s]:%s]' % (self.id, self.comment[:chars] + (self.comment[chars:] and '...'), self.post)
+
+    def delete(self, **kwargs):
+        return self.api.uncomment(post_id=self.post.id, comment_id=self.id, **kwargs)
+
 
 class Like(Model):
     @classmethod
@@ -187,6 +276,13 @@ class Like(Model):
             del self['likeId']
 
         return self
+
+    def __repr__(self):
+        chars = 10
+        return 'Like[%s:%s]' % (self.id, self.post)
+
+    def delete(self, **kwargs):
+        return self.api.unlike(post_id=self.post.id, **kwargs)
 
 
 class Repost(Model):
@@ -206,6 +302,12 @@ class Repost(Model):
 
         return self
 
+    def __repr__(self):
+        chars = 10
+        return 'Repost[%s:%s]' % (self.id, self.post)
+
+    def delete(self, **kwargs):
+        return self.api.unrevine(post_id=self.post.id, revine_id=self.id, **kwargs)
 
 class Tag(Model):
     @classmethod
@@ -219,6 +321,12 @@ class Tag(Model):
             del self['tagId']
 
         return self
+
+    def __repr__(self):
+        return 'Tag[%s:%s]' % (self.id, self.tag)
+
+    def timeline(self):
+        return self.api.get_tag_timeline(tag_name=self.tag, **kwargs)
 
 
 class Channel(Model):
@@ -236,9 +344,24 @@ class Channel(Model):
 
         return self
 
+    def __repr__(self):
+        return 'Channel[%s:%s]' % (self.id, self.channel)
 
-# mention or hashtag in comment or title
+    def timeline(self):
+        return self.api.get_channel_recent_timeline(channel_id=self.id, **kwargs)
+
+    def recent_timeline(self):
+        return self.timeline()
+
+    def popular_timeline(self):
+        return self.api.get_channel_popular_timeline(channel_id=self.id, **kwargs)
+
+# mention, tag or post in a notification, comment or title
 class Entity(Model):
+    pass
+
+
+class Venue(Model):
     pass
 
 
