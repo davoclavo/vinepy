@@ -10,6 +10,8 @@ HEADERS = {
 
 OPTIONAL_PARAMS = ['size', 'page', 'anchor']
 
+DEVICE_TOKEN = '0cc1dab0dab0dab0dab0dab0dab0dab0dab0dab0dab0dab0dab0dab0dab0dab0'
+
 ENDPOINTS = {
 
     # Auth
@@ -18,7 +20,8 @@ ENDPOINTS = {
         'request_type': 'post',
         'url_params': [],
         'required_params': ['username', 'password'],
-        'optional_params': [],
+        'optional_params': ['deviceToken'],
+        'default_params': [('deviceToken', DEVICE_TOKEN)],
         'model': User
     },
     'logout': {
@@ -123,7 +126,7 @@ ENDPOINTS = {
         'model': None
     },
     'get_notifications': {
-        'endpoint': 'users/%s/pendingNotificationsCount',
+        'endpoint': 'users/%s/notifications',
         'request_type': 'get',
         'url_params': ['user_id'],
         'required_params': [],
@@ -149,14 +152,14 @@ ENDPOINTS = {
         'model': UserCollection
     },
 
-    # Posts
+    # Posts actions
     'like': {
         'endpoint': 'posts/%s/likes',
         'request_type': 'post',
         'url_params': ['post_id'],
         'required_params': [],
         'optional_params': [],
-        'model': None #likeId
+        'model': Like
     },
     'unlike': {
         'endpoint': 'posts/%s/likes',
@@ -188,7 +191,7 @@ ENDPOINTS = {
         'url_params': ['post_id'],
         'required_params': [],
         'optional_params': [],
-        'model': None
+        'model': Repost
     },
     'unrevine': {
         'endpoint': 'posts/%s/repost/%s',
