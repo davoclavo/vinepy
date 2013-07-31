@@ -4,8 +4,11 @@ API_URL = 'https://api.vineapp.com/'
 MEDIA_URL = 'http://media.vineapp.com/'
 
 HEADERS = {
-    'User-Agent': 'com.vine.iphone/1.0.3 (unknown, iPhone OS 6.0.1, iPhone, Scale/2.000000)',
-    'Accept-Language': 'en, sv, fr, de, ja, nl, it, es, pt, pt-PT, da, fi, nb, ko, zh-Hans, zh-Hant, ru, pl, tr, uk, ar, hr, cs, el, he, ro, sk, th, id, ms, en-GB, ca, hu, vi, en-us;q=0.8'
+    'User-Agent':      'iphone/1.3.1 (iPhone; iOS 6.1.4; Scale/2.00)',
+    'Accept-Language': 'en;q=1, fr;q=0.9, de;q=0.8, ja;q=0.7, nl;q=0.6, it;q=0.5',
+    'X-Vine-Client':   'ios/1.3.1',
+    'Accept-Encoding': 'gzip, deflate',
+    'Connection':      'keep-alive'
 }
 
 OPTIONAL_PARAMS = ['size', 'page', 'anchor']
@@ -225,6 +228,31 @@ ENDPOINTS = {
         'optional_params': [],
         'model': None
     },
+    'get_post_likes': {
+        'endpoint': 'posts/%s/likes',
+        'request_type': 'get',
+        'url_params': ['post_id'],
+        'required_params': [],
+        'optional_params': OPTIONAL_PARAMS,
+        'model': LikeCollection
+    },
+    'get_post_comments': {
+        'endpoint': 'posts/%s/comments',
+        'request_type': 'get',
+        'url_params': ['post_id'],
+        'required_params': [],
+        'optional_params': [],
+        'model': CommentCollection
+    },
+    'get_post_reposts': {
+        'endpoint': 'posts/%s/reposts',
+        'request_type': 'get',
+        'url_params': ['post_id'],
+        'required_params': [],
+        'optional_params': [],
+        'model': RepostCollection
+    },
+
 
     # Timelines
     'get_post': {
@@ -252,7 +280,7 @@ ENDPOINTS = {
         'model': PostCollection
     },
     'get_tag_timeline': {
-        'endpoint': 'timelines/users/%s',
+        'endpoint': 'timelines/tags/%s',
         'request_type': 'get',
         'url_params': ['tag_name'],
         'required_params': [],
