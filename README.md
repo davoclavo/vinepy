@@ -1,7 +1,7 @@
 vinepy
 ======
 
-***Python wrapper for the [Vine](https://vine.co)  Private API ***
+*Python wrapper for the [Vine](https://vine.co)  Private API*
 
 ## Requirements
 
