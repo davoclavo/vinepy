@@ -1,6 +1,6 @@
 import json
 from datetime import datetime
-
+from sys import stdout
 from errors import *
 
 def strptime(string, fmt='%Y-%m-%dT%H:%M:%S.%f'):
@@ -34,8 +34,42 @@ class Model(AttrDict):
         self['json'] = json.dumps(data)
         return self
 
+    @classmethod
+    def from_id(cls, _id, **kwargs):
+        self = cls()
+        self['id'] = _id
+        return self
+
     def connect_api(self, api):
         self.api = api
+
+    def __repr__(self):
+        classname = self.__class__.__name__
+        id_ = self.id
+
+        name_attr = {
+            'User': 'username',
+            'Post': 'description',
+            'Comment': 'comment',
+            'Tag': 'tag',
+            'Channel': 'channel'
+        }.get(classname)
+        name = self.get(name_attr, '<Unknown>')
+
+        max_chars = 10
+        name = name[:max_chars] + (name[max_chars:] and '...')
+
+        # description, usernames and comments may contain weird chars
+        name = name.encode(stdout.encoding)
+        return "<%s [%s] '%s'>" % (classname, id_, name)
+
+        # belongs_to = self.get('belongs_to')
+        # if belongs_to:
+        #     belongs_to = '[%s]' % belongs_to
+        # else:
+        #     belongs_to = ''
+
+        # return '%s[%s:%s%s]' % (classname, id_, name, belongs_to)
 
 
 class ModelCollection(list):
@@ -102,7 +136,21 @@ class MetaModelCollection(Model):
     def get_collection(self):
         return self.get(self.model_key, [])
 
-# User decorator
+
+# from_json decorator
+def parse_vine_json(fn):
+    def _decorator(self, *args, **kwargs):
+        self = fn(self, *args, **kwargs)
+        # Parse ID and add it as 'id' attribute
+        classname = self.__class__.__name__.lower()
+        vineId = classname + 'Id'
+        if self.get(vineId):
+            self['id'] = self[vineId]
+            # del self[vineId]
+        return self
+    return _decorator
+
+# Own user methods decorator
 def only_me(fn):
     def _decorator(self, *args, **kwargs):
         if('key' in self.keys()):
@@ -114,19 +162,12 @@ def only_me(fn):
 
 class User(Model):
     @classmethod
+    @parse_vine_json
     def from_json(cls, data):
         self = cls(Model.from_json(data))
         for key, value in self.iteritems():
             self[key] = value
-
-        if(self['userId']):
-            self['id'] = self['userId']
-            del self['userId']
-
         return self
-
-    def __repr__(self):
-        return "User[%s:%s]" % (self.id, self.username)
 
     def connect_api(self, api):
         self.api = api
@@ -148,7 +189,8 @@ class User(Model):
     def followers(self, **kwargs):
         return self.api.get_followers(user_id=self.id, **kwargs)
 
-    def following(self, **kwargs):
+    # Followings instead of followers because vine has an attribute `following` 0|1
+    def followings(self, **kwargs):
         return self.api.get_following(user_id=self.id, **kwargs)
 
     def timeline(self, **kwargs):
@@ -182,6 +224,7 @@ class User(Model):
 
 class Post(Model):
     @classmethod
+    @parse_vine_json
     def from_json(cls, data):
         self = cls(Model.from_json(data))
         for key, value in self.iteritems():
@@ -202,16 +245,7 @@ class Post(Model):
             elif key == 'user':
                 value = User.from_json(value)
             self[key] = value
-
-        if(self['postId']):
-            self['id'] = self['postId']
-            del self['postId']
-
         return self
-
-    def __repr__(self):
-        chars = 10
-        return 'Post[%s:%s]' % (self.id, self.description[:chars] + (self.description[chars:] and '...'))
 
     def like(self, **kwargs):
         return self.api.like(post_id=self.id, **kwargs)
@@ -225,15 +259,22 @@ class Post(Model):
     def comment(self, **kwargs):
         return self.api.comment(post_id=self.id, **kwargs)
 
-    # def uncomment(self, **kwargs):
-    #     return self.api.comment(post_id=self.id, **kwargs)
-
     def report(self, **kwargs):
         return self.api.report(post_id=self.id, **kwargs)
+
+    def get_likes(self, **kwargs):
+        return self.api.get_post_likes(post_id=self.id, **kwargs)
+
+    def get_comments(self, **kwargs):
+        return self.api.get_post_comments(post_id=self.id, **kwargs)
+
+    def get_reposts(self, **kwargs):
+        return self.api.get_post_reposts(post_id=self.id, **kwargs)
 
 
 class Comment(Model):
     @classmethod
+    @parse_vine_json
     def from_json(cls, data):
         self = cls(Model.from_json(data))
         for key, value in self.iteritems():
@@ -245,16 +286,7 @@ class Comment(Model):
             elif key == 'user':
                 value = User.from_json(value)
             self[key] = value
-
-        if(self['commentId']):
-            self['id'] = self['commentId']
-            del self['commentId']
-
         return self
-
-    def __repr__(self):
-        chars = 10
-        return 'Comment[[%s:%s]:%s]' % (self.id, self.comment[:chars] + (self.comment[chars:] and '...'), self.post)
 
     def delete(self, **kwargs):
         return self.api.uncomment(post_id=self.post.id, comment_id=self.id, **kwargs)
@@ -277,16 +309,13 @@ class Like(Model):
 
         return self
 
-    def __repr__(self):
-        chars = 10
-        return 'Like[%s:%s]' % (self.id, self.post)
-
     def delete(self, **kwargs):
         return self.api.unlike(post_id=self.post.id, **kwargs)
 
 
 class Repost(Model):
     @classmethod
+    @parse_vine_json
     def from_json(cls, data):
         self = cls(Model.from_json(data))
         for key, value in self.iteritems():
@@ -295,35 +324,20 @@ class Repost(Model):
             elif key == 'user':
                 value = User.from_json(value)
             self[key] = value
-
-        if(self['repostId']):
-            self['id'] = self['repostId']
-            del self['repostId']
-
         return self
-
-    def __repr__(self):
-        chars = 10
-        return 'Repost[%s:%s]' % (self.id, self.post)
 
     def delete(self, **kwargs):
         return self.api.unrevine(post_id=self.post.id, revine_id=self.id, **kwargs)
 
+
 class Tag(Model):
     @classmethod
+    @parse_vine_json
     def from_json(cls, data):
         self = cls(Model.from_json(data))
         for key, value in self.iteritems():
             self[key] = value
-
-        if(self['tagId']):
-            self['id'] = self['tagId']
-            del self['tagId']
-
         return self
-
-    def __repr__(self):
-        return 'Tag[%s:%s]' % (self.id, self.tag)
 
     def timeline(self):
         return self.api.get_tag_timeline(tag_name=self.tag, **kwargs)
@@ -331,21 +345,14 @@ class Tag(Model):
 
 class Channel(Model):
     @classmethod
+    @parse_vine_json
     def from_json(cls, data):
         self = cls(Model.from_json(data))
         for key, value in self.iteritems():
             if key == 'created':
                 value = strptime(value)
             self[key] = value
-
-        if(self['channelId']):
-            self['id'] = self['channelId']
-            del self['channelId']
-
         return self
-
-    def __repr__(self):
-        return 'Channel[%s:%s]' % (self.id, self.channel)
 
     def timeline(self):
         return self.api.get_channel_recent_timeline(channel_id=self.id, **kwargs)
@@ -355,6 +362,23 @@ class Channel(Model):
 
     def popular_timeline(self):
         return self.api.get_channel_popular_timeline(channel_id=self.id, **kwargs)
+
+
+class Notification(Model):
+    @classmethod
+    @parse_vine_json
+    def from_json(cls, data):
+        self = cls(Model.from_json(data))
+        for key, value in self.iteritems():
+            if key == 'created':
+                value = strptime(value)
+            elif key == 'userId':
+                value = User.from_id(value)
+            elif key == 'postId':
+                value = Post.from_id(value)
+            self[key] = value
+        return self
+
 
 # mention, tag or post in a notification, comment or title
 class Entity(Model):
@@ -410,7 +434,7 @@ class PureTagCollection(ModelCollection):
     model = Tag
 
 
-class TagCollection(ModelCollection):
+class TagCollection(MetaModelCollection):
     collection_class = PureTagCollection
 
 
@@ -420,3 +444,11 @@ class PureChannelCollection(ModelCollection):
 
 class ChannelCollection(MetaModelCollection):
     collection_class = PureChannelCollection
+
+
+class PureNotificationCollection(ModelCollection):
+    model = Notification
+
+
+class NotificationCollection(MetaModelCollection):
+    collection_class = PureNotificationCollection
