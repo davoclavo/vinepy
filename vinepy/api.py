@@ -1,6 +1,5 @@
 #add check if requests is installed
 import requests
-import logging
 
 from models import *
 from endpoints import *
@@ -8,12 +7,13 @@ from errors import *
 
 
 class API(object):
-    def __init__(self, username=None, password=None):
+    def __init__(self, username=None, password=None, DEBUG=False):
         self.username = username
         self.password = password
         self._endpoint = None
         self._session_id = None
-        self.user = self.login() if self.username and self.password else DummyUser()
+        self.user = self.login(username=username, password=password) if self.username and self.password else DummyUser()
+        self.DEBUG = DEBUG
 
     def __getattr__(self, attr):
         if attr.startswith('__'):
@@ -41,8 +41,6 @@ class API(object):
 
         url = self.build_request_url(API_URL, endpoint)
         response = self.do_request(meta['request_type'], url, params['data'])
-
-        print response
 
         if meta['model'] is None:
             return response
@@ -86,12 +84,6 @@ class API(object):
         return {'url': url_params, 'data': data_params}
 
     def do_request(self, request_type, url, data=None):
-        request = {
-            'post': requests.post,
-            'get': requests.get,
-            'delete': requests.delete,
-            'put': requests.put
-        }[request_type]
 
         if request_type == 'get':
             params = data
@@ -103,18 +95,36 @@ class API(object):
         if self._session_id:
             headers['vine-session-id'] = self._session_id
 
-        r = request(url, params=params, data=data, headers=headers, verify=False)
 
-        print url
+        if(self.DEBUG):
+            # pip install mitmproxy
+            # mitmproxy
+            http_proxy  = "http://localhost:8080"
+            https_proxy = "http://localhost:8080"
 
-        try:
-            response = r.json()
-            if response['success'] is not True:
-                raise VineError(response['code'], response['error'])
-            return response['data']
-        except:
-            logging.error(r.text)
-            raise
+            proxies = {
+                          "http"  : http_proxy,
+                          "https" : https_proxy,
+                      }
+
+            # cafile='/home/dav/.mitmproxy/mitmproxy-ca-cert.pem'
+            cafile=False
+            response = requests.request(request_type, url, params=params, data=data, headers=headers, verify=cafile, proxies=proxies)
+            print 'REQUESTED: %s [%s]' % (url, response.status_code)
+        else:
+            response = requests.request(request_type, url, params=params, data=data, headers=headers, verify=False)
+
+        if response.status_code in [200, 400, 420]:
+            try:
+                json = response.json()
+            except:
+                raise VineError(1000, 'Vine replied with non-json content:\n' + response.text)
+
+            if json['success'] is not True:
+                raise VineError(json['code'], json['error'])
+            return json['data']
+        else:
+            raise VineError(response.status_code, response.text)
 
     def authenticate(self, user):
         self.user = user
