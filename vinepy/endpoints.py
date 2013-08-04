@@ -39,7 +39,7 @@ ENDPOINTS = {
         'endpoint': 'users',
         'request_type': 'post',
         'url_params': [],
-        'required_params': ['username', 'password', 'email', 'authenticate'],
+        'required_params': ['email', 'password', 'username'],
         'optional_params': [],
         'default_params': [('authenticate', 1)],
         'model': User
@@ -62,7 +62,7 @@ ENDPOINTS = {
         'optional_params': [],
         'model': User
     },
-    'update_user': {
+    'update_profile': {
         'endpoint': 'users/%s',
         'request_type': 'post',
         'url_params': ['user_id'],
@@ -134,7 +134,7 @@ ENDPOINTS = {
         'url_params': ['user_id'],
         'required_params': [],
         'optional_params': [],
-        'model': None
+        'model': NotificationCollection
     },
 
     # User lists
@@ -218,7 +218,7 @@ ENDPOINTS = {
         'url_params': [],
         'required_params': ['videoUrl', 'thumbnailUrl', 'description', 'entities'],
         'optional_params': ['forsquareVenueId', 'venueName', 'channelId'],
-        'model': None
+        'model': Post
     },
     'delete_post': {
         'endpoint': 'posts/%s',
@@ -287,7 +287,7 @@ ENDPOINTS = {
         'optional_params': OPTIONAL_PARAMS,
         'model': PostCollection
     },
-    'get_main_timeline': {
+    'get_graph_timeline': {
         'endpoint': 'timelines/graph',
         'request_type': 'get',
         'url_params': [],
@@ -303,7 +303,7 @@ ENDPOINTS = {
         'optional_params': OPTIONAL_PARAMS,
         'model': PostCollection
     },
-    'get_ontherise_timeline': {
+    'get_trending_timeline': {
         'endpoint': 'timelines/trending',
         'request_type': 'get',
         'url_params': [],
@@ -311,7 +311,7 @@ ENDPOINTS = {
         'optional_params': OPTIONAL_PARAMS,
         'model': PostCollection
     },
-    'get_editorpicks_timeline': {
+    'get_promoted_timeline': {
         'endpoint': 'timelines/promoted',
         'request_type': 'get',
         'url_params': [],
@@ -376,7 +376,7 @@ ENDPOINTS = {
     'search_users': {
         'endpoint': 'users/search/%s',
         'request_type': 'get',
-        'url_params': ['query'],
+        'url_params': ['user_name'],
         'required_params': [],
         'optional_params': OPTIONAL_PARAMS,
         'model': UserCollection
