@@ -6,17 +6,6 @@ from errors import *
 def strptime(string, fmt='%Y-%m-%dT%H:%M:%S.%f'):
     return datetime.strptime(string, fmt)
 
-
-class DummyAPI():
-    def __getattr__(self, name):
-        raise NotImplementedError('This model does not have an API instance associated with it.')
-
-
-class DummyUser():
-    def __getattr__(self, name):
-        raise NotImplementedError("This API instance does not have an authenticated user, try logging in or signing up.")
-
-
 # From http://stackoverflow.com/a/14620633
 # CAUTION: it causes memory leak in < 2.7.3 and < 3.2.3
 class AttrDict(dict):
@@ -24,14 +13,55 @@ class AttrDict(dict):
         super(AttrDict, self).__init__(*args, **kwargs)
         self.__dict__ = self
 
+# from_json decorator
+def parse_vine_json(fn):
+    def _decorator(self, *args, **kwargs):
+        self = fn(self, *args, **kwargs)
+
+        # Vine adds classname+'Id' as an id to the object
+        classname = self.__class__.__name__.lower()
+        vineId = classname + 'Id'
+
+        for key in self.keys():
+            value = self[key]
+
+            if key == vineId:
+                self['id'] = self[vineId]
+                # del self[vineId]
+            elif key == 'userId':
+                self['user'] = User.from_id(value)
+            elif key == 'postId':
+                self['post'] = Post.from_id(value)
+            elif key == 'created':
+                self[key] = strptime(value)
+            elif key == 'comments':
+                self[key] = CommentCollection.from_json(value)
+            elif key == 'likes':
+                self[key] = LikeCollection.from_json(value)
+            elif key == 'reposts':
+                self[key] = RepostCollection.from_json(value)
+            elif key == 'tags':
+                self[key] = PureTagCollection.from_json(value)
+            elif key == 'entities':
+                self[key] = PureEntityCollection.from_json(value)
+            elif key == 'user':
+                self[key] = User.from_json(value)
+        return self
+    return _decorator
+
 
 class Model(AttrDict):
-    api = DummyAPI()
+    api = None
 
     @classmethod
+    @parse_vine_json
     def from_json(cls, data):
-        self = cls(data)
-        self['json'] = json.dumps(data)
+        self = cls()
+        self._attrs = AttrDict(data)
+        self.json = json.dumps(data)
+        for key, value in self._attrs.iteritems():
+            if key not in dir(self):
+                 self[key] = value
         return self
 
     @classmethod
@@ -52,7 +82,12 @@ class Model(AttrDict):
             'Post': 'description',
             'Comment': 'comment',
             'Tag': 'tag',
-            'Channel': 'channel'
+            'Channel': 'channel',
+            'Notification': 'notificationTypeId',
+            'Entity': 'title',
+
+            'Like': 'post',
+            'Repost': 'post'
         }.get(classname)
         name = self.get(name_attr, '<Unknown>')
 
@@ -136,61 +171,49 @@ class MetaModelCollection(Model):
     def get_collection(self):
         return self.get(self.model_key, [])
 
-
-# from_json decorator
-def parse_vine_json(fn):
+# Ensure ownership of the object, to avoid wasting an request
+def ensure_ownership(fn):
     def _decorator(self, *args, **kwargs):
-        self = fn(self, *args, **kwargs)
-        # Parse ID and add it as 'id' attribute
-        classname = self.__class__.__name__.lower()
-        vineId = classname + 'Id'
-        if self.get(vineId):
-            self['id'] = self[vineId]
-            # del self[vineId]
-        return self
-    return _decorator
-
-# Own user methods decorator
-def only_me(fn):
-    def _decorator(self, *args, **kwargs):
-        if('key' in self.keys()):
+        user_id = self.get('post',{}).get('user',{}).get('id') or self.get('user',{}).get('id') or self.id
+        if(user_id == self.api._user_id):
             return fn(self, *args, **kwargs)
         else:
-            # raise VineError(4, "You don't have permission to access that record.")
-            raise VineError(1337, "Only %s can access this record." % self)
+            raise VineError(4, "You don't have permission to access that record.")
+            # raise VineError(1, "Only %s can access this record." % self)
+    return _decorator
+
+def chained(fn):
+    def _decorator(self, *args, **kwargs):
+        fn(self, *args, **kwargs)
+        return self
     return _decorator
 
 class User(Model):
-    @classmethod
-    @parse_vine_json
-    def from_json(cls, data):
-        self = cls(Model.from_json(data))
-        for key, value in self.iteritems():
-            self[key] = value
-        return self
-
     def connect_api(self, api):
         self.api = api
         if('key' in self.keys()):
             self.api.authenticate(self)
 
+    @chained
     def follow(self, **kwargs):
         return self.api.follow(user_id=self.id, **kwargs)
 
+    @chained
     def unfollow(self, **kwargs):
         return self.api.unfollow(user_id=self.id, **kwargs)
 
+    @chained
     def block(self, **kwargs):
         return self.api.block(user_id=self.id, **kwargs)
 
+    @chained
     def unblock(self, **kwargs):
         return self.api.unblock(user_id=self.id, **kwargs)
 
     def followers(self, **kwargs):
         return self.api.get_followers(user_id=self.id, **kwargs)
 
-    # Followings instead of followers because vine has an attribute `following` 0|1
-    def followings(self, **kwargs):
+    def following(self, **kwargs):
         return self.api.get_following(user_id=self.id, **kwargs)
 
     def timeline(self, **kwargs):
@@ -199,185 +222,119 @@ class User(Model):
     def likes(self, **kwargs):
         return self.api.get_user_likes(user_id=self.id, **kwargs)
 
-    @only_me
+    @ensure_ownership
     def pending_notifications_count(self, **kwargs):
-        # if('key' in self.keys()):
         return self.api.get_pending_notifications_count(user_id=self.id, **kwargs)
 
-    @only_me
+    @ensure_ownership
     def notifications(self, **kwargs):
-        # if('key' in self.keys()):
         return self.api.get_notifications(user_id=self.id, **kwargs)
 
-    @only_me
+    @chained
+    @ensure_ownership
     def update(self, **kwargs):
         return self.api.update_user(user_id=self.id, **kwargs)
 
-    @only_me
+    @chained
+    @ensure_ownership
     def set_explicit(self, **kwargs):
         return self.api.set_explicit(user_id=self.id, **kwargs)
 
-    @only_me
+    @ensure_ownership
     def unset_explicit(self, **kwargs):
         return self.api.unset_explicit(user_id=self.id, **kwargs)
 
 
-class Post(Model):
-    @classmethod
-    @parse_vine_json
-    def from_json(cls, data):
-        self = cls(Model.from_json(data))
-        for key, value in self.iteritems():
-            if key == 'created':
-                value = strptime(value)
-            elif key == 'comments':
-                value = CommentCollection.from_json(value)
-                pass
-            elif key == 'likes':
-                value = LikeCollection.from_json(value)
-                pass
-            elif key == 'reposts':
-                value = RepostCollection.from_json(value)
-                pass
-            elif key == 'tags':
-                value = PureTagCollection.from_json(value)
-                pass
-            elif key == 'user':
-                value = User.from_json(value)
-            self[key] = value
-        return self
+    def is_following(self):
+        return bool(self._attrs.following)
 
+    def is_private(self):
+        return bool(self._attrs.private)
+
+    def is_blocking(self):
+        return bool(self._attrs.blocking)
+
+    def is_blocked(self):
+        return bool(self._attrs.blocked)
+
+
+def inject_post(fn):
+    def _decorator(self, *args, **kwargs):
+        obj = fn(self, *args, **kwargs)
+        obj.post = self
+        return obj
+    return _decorator
+
+class Post(Model):
+    @inject_post
     def like(self, **kwargs):
         return self.api.like(post_id=self.id, **kwargs)
 
     def unlike(self, **kwargs):
         return self.api.unlike(post_id=self.id, **kwargs)
 
+    @inject_post
     def revine(self, **kwargs):
         return self.api.revine(post_id=self.id, **kwargs)
 
-    def comment(self, **kwargs):
-        return self.api.comment(post_id=self.id, **kwargs)
+    @inject_post
+    def comment(self, comment, entities=[], **kwargs):
+        return self.api.comment(post_id=self.id, comment=comment, entities=entities, **kwargs)
 
+
+    @chained
     def report(self, **kwargs):
         return self.api.report(post_id=self.id, **kwargs)
 
-    def get_likes(self, **kwargs):
+    def likes(self, **kwargs):
         return self.api.get_post_likes(post_id=self.id, **kwargs)
 
-    def get_comments(self, **kwargs):
+    def comments(self, **kwargs):
         return self.api.get_post_comments(post_id=self.id, **kwargs)
 
-    def get_reposts(self, **kwargs):
+    def reposts(self, **kwargs):
         return self.api.get_post_reposts(post_id=self.id, **kwargs)
 
 
 class Comment(Model):
-    @classmethod
-    @parse_vine_json
-    def from_json(cls, data):
-        self = cls(Model.from_json(data))
-        for key, value in self.iteritems():
-            if key == 'created':
-                value = strptime(value)
-            elif key == 'entities':
-                # value = EntityCollection.from_json(value)
-                pass
-            elif key == 'user':
-                value = User.from_json(value)
-            self[key] = value
-        return self
-
+    @ensure_ownership
     def delete(self, **kwargs):
         return self.api.uncomment(post_id=self.post.id, comment_id=self.id, **kwargs)
+    pass
 
 
 class Like(Model):
-    @classmethod
-    def from_json(cls, data):
-        self = cls(Model.from_json(data))
-        for key, value in self.iteritems():
-            if key == 'created':
-                value = strptime(value)
-            elif key == 'user':
-                value = User.from_json(value)
-            self[key] = value
-
-        if(self['likeId']):
-            self['id'] = self['likeId']
-            del self['likeId']
-
-        return self
-
+    @ensure_ownership
     def delete(self, **kwargs):
         return self.api.unlike(post_id=self.post.id, **kwargs)
+    pass
 
 
 class Repost(Model):
-    @classmethod
-    @parse_vine_json
-    def from_json(cls, data):
-        self = cls(Model.from_json(data))
-        for key, value in self.iteritems():
-            if key == 'created':
-                value = strptime(value)
-            elif key == 'user':
-                value = User.from_json(value)
-            self[key] = value
-        return self
-
+    @ensure_ownership
     def delete(self, **kwargs):
         return self.api.unrevine(post_id=self.post.id, revine_id=self.id, **kwargs)
+    pass
 
 
 class Tag(Model):
-    @classmethod
-    @parse_vine_json
-    def from_json(cls, data):
-        self = cls(Model.from_json(data))
-        for key, value in self.iteritems():
-            self[key] = value
-        return self
-
-    def timeline(self):
+    def timeline(self, **kwargs):
         return self.api.get_tag_timeline(tag_name=self.tag, **kwargs)
 
 
 class Channel(Model):
-    @classmethod
-    @parse_vine_json
-    def from_json(cls, data):
-        self = cls(Model.from_json(data))
-        for key, value in self.iteritems():
-            if key == 'created':
-                value = strptime(value)
-            self[key] = value
-        return self
-
-    def timeline(self):
+    def timeline(self, **kwargs):
         return self.api.get_channel_recent_timeline(channel_id=self.id, **kwargs)
 
-    def recent_timeline(self):
+    def recent_timeline(self, **kwargs):
         return self.timeline()
 
-    def popular_timeline(self):
+    def popular_timeline(self, **kwargs):
         return self.api.get_channel_popular_timeline(channel_id=self.id, **kwargs)
 
 
 class Notification(Model):
-    @classmethod
-    @parse_vine_json
-    def from_json(cls, data):
-        self = cls(Model.from_json(data))
-        for key, value in self.iteritems():
-            if key == 'created':
-                value = strptime(value)
-            elif key == 'userId':
-                value = User.from_id(value)
-            elif key == 'postId':
-                value = Post.from_id(value)
-            self[key] = value
-        return self
+    pass
 
 
 # mention, tag or post in a notification, comment or title
@@ -452,3 +409,7 @@ class PureNotificationCollection(ModelCollection):
 
 class NotificationCollection(MetaModelCollection):
     collection_class = PureNotificationCollection
+
+
+class PureEntityCollection(ModelCollection):
+    model = Entity

@@ -15,7 +15,7 @@ class API(object):
         self.DEBUG = DEBUG
 
         self._make_dynamic_methods()
-        self.user = self.login(username=username, password=password) if self.username and self.password else DummyUser()
+        self.user = self.login(username=username, password=password) if self.username and self.password else None
 
 
     def _make_dynamic_methods(self):
