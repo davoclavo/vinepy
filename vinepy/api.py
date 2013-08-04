@@ -5,32 +5,35 @@ from models import *
 from endpoints import *
 from errors import *
 
+from functools import partial
 
 class API(object):
     def __init__(self, username=None, password=None, DEBUG=False):
         self.username = username
         self.password = password
-        self._endpoint = None
         self._session_id = None
-        self.user = self.login(username=username, password=password) if self.username and self.password else DummyUser()
         self.DEBUG = DEBUG
 
-    def __getattr__(self, attr):
-        if attr.startswith('__'):
-            return object.__getattribute__(self, attr)
-        self._endpoint = attr
-        return self.api_call
+        self._make_dynamic_methods()
+        self.user = self.login(username=username, password=password) if self.username and self.password else DummyUser()
+
+
+    def _make_dynamic_methods(self):
+        for endpoint in ENDPOINTS.keys():
+            def _inner(endpoint, *args, **kwargs):
+                return self.api_call(endpoint, *args, **kwargs)
+            _inner.__name__ = endpoint
+            setattr(self, _inner.__name__, partial(_inner, endpoint))
 
     def build_request_url(self, root, endpoint):
         url = '%s%s' % (root, endpoint)
         # encode url params
         return url
 
-    def api_call(self, *args, **kwargs):
-        if self._endpoint not in ENDPOINTS:
-            raise NotImplementedError('API endpoint for method "%s" is not found.' % self._endpoint)
+    def api_call(self, endpoint, *args, **kwargs):
+        # raise NotImplementedError('API endpoint for method "%s" is not found.' % endpoint)
 
-        meta = ENDPOINTS[self._endpoint]
+        meta = ENDPOINTS[endpoint]
 
         params = self.check_params(meta, kwargs)
 
@@ -95,7 +98,6 @@ class API(object):
         if self._session_id:
             headers['vine-session-id'] = self._session_id
 
-
         if(self.DEBUG):
             # pip install mitmproxy
             # mitmproxy
@@ -129,3 +131,4 @@ class API(object):
     def authenticate(self, user):
         self.user = user
         self._session_id = user.key
+        self._user_id = user.id
