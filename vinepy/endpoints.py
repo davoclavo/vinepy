@@ -175,6 +175,7 @@ ENDPOINTS = {
     'comment': {
         'endpoint': 'posts/%s/comments',
         'request_type': 'post',
+        'json': True,
         'url_params': ['post_id'],
         'required_params': ['comment', 'entities'],
         'optional_params': [],

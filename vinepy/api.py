@@ -6,6 +6,7 @@ from endpoints import *
 from errors import *
 
 from functools import partial
+from json import dumps
 
 class API(object):
     def __init__(self, username=None, password=None, DEBUG=False):
@@ -32,7 +33,6 @@ class API(object):
 
     def api_call(self, endpoint, *args, **kwargs):
         # raise NotImplementedError('API endpoint for method "%s" is not found.' % endpoint)
-
         meta = ENDPOINTS[endpoint]
 
         params = self.check_params(meta, kwargs)
@@ -43,7 +43,7 @@ class API(object):
             endpoint = meta['endpoint']
 
         url = self.build_request_url(API_URL, endpoint)
-        response = self.do_request(meta['request_type'], url, params['data'])
+        response = self.do_request(meta['request_type'], url, params['data'], meta.get('json',False))
 
         if meta['model'] is None:
             return response
@@ -86,15 +86,18 @@ class API(object):
 
         return {'url': url_params, 'data': data_params}
 
-    def do_request(self, request_type, url, data=None):
+    def do_request(self, request_type, url, data=None, is_json=False):
+        headers = HEADERS.copy()
 
         if request_type == 'get':
             params = data
             data = None
         else:
+            if is_json:
+                data = dumps(data)
+                headers['Content-Type'] = 'application/json; charset=utf-8'
             params = None
 
-        headers = HEADERS.copy()
         if self._session_id:
             headers['vine-session-id'] = self._session_id
 

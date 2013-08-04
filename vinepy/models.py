@@ -279,7 +279,23 @@ class Post(Model):
 
     @inject_post
     def comment(self, comment, entities=[], **kwargs):
-        return self.api.comment(post_id=self.id, comment=comment, entities=entities, **kwargs)
+        _comment = ''
+        if type(comment) is list:
+            entities = []
+            for element in comment:
+                if type(element) is str:
+                    _comment += element
+                else:
+                    entity = {
+                            'id':element.id,
+                            'range': [len(_comment), len(_comment)+len(element.name)],
+                            'type': 'mention',
+                            'title': element.name
+                            }
+                    _comment += element.name + ' '
+                    entities.append(entity)
+
+        return self.api.comment(post_id=self.id, comment=_comment, entities=entities, **kwargs)
 
 
     @chained
