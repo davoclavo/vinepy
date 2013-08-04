@@ -9,15 +9,14 @@ vinepy
 
 ## Installation
 
-*I will register this package in the Python Package Index soon*
+`pip install vinepy`
 
 ## Usage
 
 ```python
 import vinepy
 
-vine = vinepy.API()
-user = vine.login(username='email@host.com', password='leinternetz')
+vine = vinepy.API(username='email@host.com', password='leinternetz')
 followers = user.followers()
 timeline = user.timeline()
 ```
