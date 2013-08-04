@@ -89,7 +89,7 @@ class Model(AttrDict):
 
     def __repr__(self):
         classname = self.__class__.__name__
-        name = self.name
+        name = str(self.name)
 
         max_chars = 10
         name = name[:max_chars] + (name[max_chars:] and '...')
@@ -294,6 +294,8 @@ class Post(Model):
                             }
                     _comment += element.name + ' '
                     entities.append(entity)
+        else:
+            _comment = comment
 
         return self.api.comment(post_id=self.id, comment=_comment, entities=entities, **kwargs)
 
