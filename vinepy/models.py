@@ -46,6 +46,20 @@ def parse_vine_json(fn):
                 self[key] = PureEntityCollection.from_json(value)
             elif key == 'user':
                 self[key] = User.from_json(value)
+
+        name_attr = {
+            'user': 'username',
+            'post': 'description',
+            'comment': 'comment',
+            'tag': 'tag',
+            'channel': 'channel',
+            'notification': 'notificationTypeId',
+
+            'like': 'postId',
+            'repost': 'postId'
+        }.get(classname)
+        self['name'] = self.get(name_attr, '<Unknown>')
+
         return self
     return _decorator
 
@@ -75,28 +89,14 @@ class Model(AttrDict):
 
     def __repr__(self):
         classname = self.__class__.__name__
-        id_ = self.id
-
-        name_attr = {
-            'User': 'username',
-            'Post': 'description',
-            'Comment': 'comment',
-            'Tag': 'tag',
-            'Channel': 'channel',
-            'Notification': 'notificationTypeId',
-            'Entity': 'title',
-
-            'Like': 'post',
-            'Repost': 'post'
-        }.get(classname)
-        name = self.get(name_attr, '<Unknown>')
+        name = self.name
 
         max_chars = 10
         name = name[:max_chars] + (name[max_chars:] and '...')
 
         # description, usernames and comments may contain weird chars
         name = name.encode(stdout.encoding)
-        return "<%s [%s] '%s'>" % (classname, id_, name)
+        return "<%s [%s] '%s'>" % (classname, self.id, name)
 
         # belongs_to = self.get('belongs_to')
         # if belongs_to:
