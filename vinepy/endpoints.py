@@ -1,7 +1,8 @@
 from models import *
 
-API_URL = 'https://api.vineapp.com/'
-MEDIA_URL = 'http://media.vineapp.com/'
+PROTOCOL = 'https'
+API_HOST = 'api.vineapp.com'
+MEDIA_HOST = 'media.vineapp.com'
 
 HEADERS = {
     'User-Agent':      'iphone/1.3.1 (iPhone; iOS 6.1.4; Scale/2.00)',
@@ -64,11 +65,11 @@ ENDPOINTS = {
     },
     'update_profile': {
         'endpoint': 'users/%s',
-        'request_type': 'post',
+        'request_type': 'put',
         'url_params': ['user_id'],
         'required_params': [],
-        'optional_params': ['description', 'location', 'locale', 'private', 'phoneNumber'],
-        'model': User
+        'optional_params': ['username', 'description', 'location', 'locale', 'email', 'private', 'phoneNumber', 'avatarUrl'],
+        'model': None
     },
     'set_explicit': {
         'endpoint': 'users/%s/explicit',
@@ -216,9 +217,11 @@ ENDPOINTS = {
     'post': {
         'endpoint': 'posts',
         'request_type': 'post',
+        'json': True,
         'url_params': [],
         'required_params': ['videoUrl', 'thumbnailUrl', 'description', 'entities'],
-        'optional_params': ['forsquareVenueId', 'venueName', 'channelId'],
+        'optional_params': ['forsquareVenueId', 'venueName'],
+        'default_params': [('channelId', '0')],
         'model': Post
     },
     'delete_post': {
@@ -382,5 +385,35 @@ ENDPOINTS = {
         'optional_params': OPTIONAL_PARAMS,
         'model': UserCollection
     },
+
+    # Upload Media
+    'upload_avatar': {
+        'host': MEDIA_HOST,
+        'endpoint': 'upload/avatars/1.3.1.jpg',
+        'request_type': 'put',
+        'url_params': [],
+        'required_params': ['filename'],
+        'optional_params': [],
+        'model': None
+    },
+    'upload_thumb': {
+        'host': MEDIA_HOST,
+        'endpoint': 'upload/thumbs/1.3.1.mp4.jpg',
+        'request_type': 'put',
+        'url_params': [],
+        'required_params': ['filename'],
+        'optional_params': [],
+        'model': None
+    },
+    'upload_video': {
+        'host': MEDIA_HOST,
+        'endpoint': 'upload/videos/1.3.1.mp4',
+        'request_type': 'put',
+        'url_params': [],
+        'required_params': ['filename'],
+        'optional_params': [],
+        'model': None
+    },
+
 
 }

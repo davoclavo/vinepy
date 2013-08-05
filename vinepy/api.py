@@ -26,8 +26,8 @@ class API(object):
             _inner.__name__ = endpoint
             setattr(self, _inner.__name__, partial(_inner, endpoint))
 
-    def build_request_url(self, root, endpoint):
-        url = '%s%s' % (root, endpoint)
+    def build_request_url(self, protocol, host, endpoint):
+        url = '%s://%s/%s' % (protocol, host, endpoint)
         # encode url params
         return url
 
@@ -37,13 +37,7 @@ class API(object):
 
         params = self.check_params(meta, kwargs)
 
-        if params['url'] != []:
-            endpoint = meta['endpoint'] % tuple(params['url'])
-        else:
-            endpoint = meta['endpoint']
-
-        url = self.build_request_url(API_URL, endpoint)
-        response = self.do_request(meta['request_type'], url, params['data'], meta.get('json',False))
+        response = self.do_request(meta, params)
 
         if meta['model'] is None:
             return response
@@ -86,17 +80,35 @@ class API(object):
 
         return {'url': url_params, 'data': data_params}
 
-    def do_request(self, request_type, url, data=None, is_json=False):
+    def do_request(self, meta, params):
         headers = HEADERS.copy()
-
-        if request_type == 'get':
-            params = data
-            data = None
+        if params['url'] != []:
+            endpoint = meta['endpoint'] % tuple(params['url'])
         else:
-            if is_json:
-                data = dumps(data)
+            endpoint = meta['endpoint']
+
+        host = API_HOST
+        # Upload methods, change host to specific host
+        if meta.get('host'):
+            host = meta['host']
+
+        url = self.build_request_url(PROTOCOL, host, endpoint)
+
+        built_params = built_data = None
+        built_data = data = params['data']
+
+        if meta['request_type'] == 'get':
+            built_params = data
+        elif meta['request_type'] == 'post':
+            if meta.get('json'):
+                built_data = dumps(data)
                 headers['Content-Type'] = 'application/json; charset=utf-8'
-            params = None
+        elif data.get('filename'):
+            if data['filename'].split('.')[-1] == 'mp4':
+                headers['Content-Type'] = 'video/mp4'
+            else:
+                headers['Content-Type'] = 'image/jpeg'
+            built_data = open(data['filename'], 'rb')
 
         if self._session_id:
             headers['vine-session-id'] = self._session_id
@@ -114,10 +126,13 @@ class API(object):
 
             # cafile='/home/dav/.mitmproxy/mitmproxy-ca-cert.pem'
             cafile=False
-            response = requests.request(request_type, url, params=params, data=data, headers=headers, verify=cafile, proxies=proxies)
+            response = requests.request(meta['request_type'], url, params=built_params, data=built_data, headers=headers, verify=cafile, proxies=proxies)
             print 'REQUESTED: %s [%s]' % (url, response.status_code)
         else:
-            response = requests.request(request_type, url, params=params, data=data, headers=headers, verify=False)
+            response = requests.request(meta['request_type'], url, params=built_params, data=built_data, headers=headers, verify=False)
+
+        if response.headers.get('X-Upload-Key'):
+            return response.headers['X-Upload-Key']
 
         if response.status_code in [200, 400, 420]:
             try:

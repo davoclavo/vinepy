@@ -89,13 +89,15 @@ class Model(AttrDict):
 
     def __repr__(self):
         classname = self.__class__.__name__
-        name = str(self.name)
 
-        max_chars = 10
-        name = name[:max_chars] + (name[max_chars:] and '...')
+        if typeof(self.name) is int:
+            name = str(self.name)
+        else:
+            # description, usernames and comments may contain weird chars
+            name = self.name.encode(stdout.encoding)
+            max_chars = 10
+            name = name[:max_chars] + (name[max_chars:] and '...')
 
-        # description, usernames and comments may contain weird chars
-        name = name.encode(stdout.encoding)
         return "<%s [%s] '%s'>" % (classname, self.id, name)
 
         # belongs_to = self.get('belongs_to')
@@ -233,7 +235,7 @@ class User(Model):
     @chained
     @ensure_ownership
     def update(self, **kwargs):
-        return self.api.update_user(user_id=self.id, **kwargs)
+        return self.api.update_profile(user_id=self.id, **kwargs)
 
     @chained
     @ensure_ownership
