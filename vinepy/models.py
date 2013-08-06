@@ -90,7 +90,7 @@ class Model(AttrDict):
     def __repr__(self):
         classname = self.__class__.__name__
 
-        if typeof(self.name) is int:
+        if type(self.name) is int:
             name = str(self.name)
         else:
             # description, usernames and comments may contain weird chars
