@@ -17,7 +17,7 @@ vinepy
 import vinepy
 
 vine = vinepy.API(username='email@host.com', password='leinternetz')
-user = vine.get_me()
+user = vine.user
 followers = user.followers()
 timeline = user.timeline()
 ```
