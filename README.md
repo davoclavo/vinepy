@@ -1,7 +1,7 @@
 vinepy
 ======
 
-*Python wrapper for the [Vine](https://vine.co)  Private API*
+*Python wrapper for [Vine](https://vine.co) API*
 
 ## Requirements
 
@@ -25,6 +25,7 @@ timeline = user.timeline()
 ## Documentation
 
 *Work in progress*
+check ``
 
 ## Acknowledgements
 
