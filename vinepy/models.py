@@ -89,12 +89,12 @@ class Model(AttrDict):
 
     def __repr__(self):
         classname = self.__class__.__name__
-
-        if typeof(self.name) is int:
-            name = str(self.name)
+        name = self.get('name', '')
+        if type(name) is int:
+            name = str(name)
         else:
             # description, usernames and comments may contain weird chars
-            name = self.name.encode(stdout.encoding)
+            name = name.encode(stdout.encoding)
             max_chars = 10
             name = name[:max_chars] + (name[max_chars:] and '...')
 
@@ -197,12 +197,14 @@ class User(Model):
             self.api.authenticate(self)
 
     @chained
-    def follow(self, **kwargs):
-        return self.api.follow(user_id=self.id, **kwargs)
+    def follow(self, user=None, **kwargs):
+        user = user or self
+        return self.api.follow(user_id=user.id, **kwargs)
 
     @chained
-    def unfollow(self, **kwargs):
-        return self.api.unfollow(user_id=self.id, **kwargs)
+    def unfollow(self, user=None, **kwargs):
+        user = user or self
+        return self.api.unfollow(user_id=user.id, **kwargs)
 
     @chained
     def block(self, **kwargs):
