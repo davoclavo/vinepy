@@ -2,7 +2,9 @@ from models import *
 
 PROTOCOL = 'https'
 API_HOST = 'api.vineapp.com'
+# API_HOST = 'api-dev.vineapp.com'
 MEDIA_HOST = 'media.vineapp.com'
+# MEDIA_HOST = 'media-dev.vineapp.com'
 
 HEADERS = {
     'User-Agent':      'iphone/1.3.1 (iPhone; iOS 6.1.4; Scale/2.00)',
@@ -68,7 +70,7 @@ ENDPOINTS = {
         'request_type': 'put',
         'url_params': ['user_id'],
         'required_params': [],
-        'optional_params': ['username', 'description', 'location', 'locale', 'email', 'private', 'phoneNumber', 'avatarUrl'],
+        'optional_params': ['username', 'description', 'location', 'locale', 'email', 'private', 'phoneNumber', 'avatarUrl', 'profileBackground', 'acceptsOutOfNetworkConversations'],
         'model': None
     },
     'set_explicit': {
