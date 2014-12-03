@@ -1,7 +1,7 @@
 vinepy
 ======
 
-*Python wrapper for the [Vine](https://vine.co)  Private API*
+*Python wrapper for [Vine](https://vine.co) API*
 
 ## Requirements
 
@@ -17,6 +17,7 @@ vinepy
 import vinepy
 
 vine = vinepy.API(username='email@host.com', password='leinternetz')
+user = vine.user
 followers = user.followers()
 timeline = user.timeline()
 ```
@@ -24,6 +25,7 @@ timeline = user.timeline()
 ## Documentation
 
 *Work in progress*
+check ``
 
 ## Acknowledgements
 
