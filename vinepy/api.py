@@ -129,7 +129,7 @@ class API(object):
             response = requests.request(meta['request_type'], url, params=built_params, data=built_data, headers=headers, verify=cafile, proxies=proxies)
             print 'REQUESTED: %s [%s]' % (url, response.status_code)
         else:
-            response = requests.request(meta['request_type'], url, params=built_params, data=built_data, headers=headers, verify=False)
+            response = requests.request(meta['request_type'], url, params=built_params, data=built_data, headers=headers)
 
         if response.headers.get('X-Upload-Key'):
             return response.headers['X-Upload-Key']
