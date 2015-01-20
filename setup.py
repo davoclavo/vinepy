@@ -7,7 +7,7 @@ setup(
   license = 'MIT',
   author = 'David Gomez Urquiza',
   author_email = 'david.gurquiza@gmail.com',
-  install_requires = ['requests>=1.2.3'],
+  install_requires = ['requests', 'nose', 'vcrpy'],
   url = 'https://github.com/davoclavo/vinepy',
   keywords = 'vine library api wrapper',
   packages = find_packages(),

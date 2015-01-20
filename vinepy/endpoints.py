@@ -7,16 +7,21 @@ MEDIA_HOST = 'media.vineapp.com'
 # MEDIA_HOST = 'media-dev.vineapp.com'
 
 HEADERS = {
-    'User-Agent':      'iphone/1.3.1 (iPhone; iOS 6.1.4; Scale/2.00)',
-    'Accept-Language': 'en;q=1, fr;q=0.9, de;q=0.8, ja;q=0.7, nl;q=0.6, it;q=0.5',
-    'X-Vine-Client':   'ios/1.3.1',
-    'Accept-Encoding': 'gzip, deflate',
-    'Connection':      'keep-alive'
+    'Host':              'api.vineapp.com',
+    'Proxy-Connection':  'keep-alive',
+    'Accept':            '*/*',
+    'X-Vine-Client':     'ios/2.5.1',
+    'Accept-Encoding':   'gzip, deflate',
+    'Content-Type':      'application/x-www-form-urlencoded; charset=utf-8',
+    'Accept-Language':   'en;q=1',
+    'Connection':        'keep-alive',
+    'User-Agent':        'iphone/172 (iPad; iOS 7.0.4; Scale/2.00)'
 }
+
 
 OPTIONAL_PARAMS = ['size', 'page', 'anchor']
 
-DEVICE_TOKEN = '0cc1dab0dab0dab0dab0dab0dab0dab0dab0dab0dab0dab0dab0dab0dab0dab0'
+DEVICE_TOKEN = 'a3352a79c3e29053a03a2e6eb89587648f5b2a291c709708816ec768d058ea45'
 
 ENDPOINTS = {
 
