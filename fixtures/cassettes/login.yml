@@ -1,0 +1,32 @@
+interactions:
+- request:
+    body: username=bobtesty%40suremail.info&password=password&deviceToken=a3352a79c3e29053a03a2e6eb89587648f5b2a291c709708816ec768d058ea45
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Accept-Language: [en;q=1]
+      Connection: [keep-alive]
+      Content-Length: ['128']
+      Content-Type: [application/x-www-form-urlencoded; charset=utf-8]
+      Host: [api.vineapp.com]
+      Proxy-Connection: [keep-alive]
+      User-Agent: [iphone/172 (iPad; iOS 7.0.4; Scale/2.00)]
+      X-Vine-Client: [ios/2.5.1]
+    method: POST
+    uri: https://api.vineapp.com:443/users/authenticate
+  response:
+    body: {string: !!python/unicode '{"code": "", "data": {"username": "Bob Testy",
+        "edition": "US", "userId": 1169361810303164416, "key": "1169361810303164416-7508513e-8757-485a-9fba-9870d111e3e5",
+        "avatarUrl": "http://v.cdn.vine.co/avatars/default.png"}, "success": true,
+        "error": ""}'}
+    headers:
+      cache-control: ['private, no-store, must-revalidate']
+      connection: [keep-alive]
+      content-length: ['249']
+      content-type: [application/json]
+      date: ['Tue, 20 Jan 2015 16:43:21 GMT']
+      expires: ['0']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=631138519]
+    status: {code: 200, message: OK}
+version: 1

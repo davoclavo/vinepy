@@ -1,0 +1,56 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Accept-Language: ['en;q=1, fr;q=0.9, de;q=0.8, ja;q=0.7, nl;q=0.6, it;q=0.5']
+      Connection: [keep-alive]
+      User-Agent: [iphone/1.3.1 (iPhone; iOS 6.1.4; Scale/2.00)]
+      X-Vine-Client: [ios/2.5.1]
+      vine-session-id: [!!python/unicode 967576278242844672-9c2f6444-66b8-4ec5-a03b-86afec71cae7]
+    method: GET
+    uri: https://api.vineapp.com:443/users//conversations
+  response:
+    body: {string: !!python/unicode '{"code": 900, "data": "", "success": false, "error":
+        "That record does not exist."}'}
+    headers:
+      cache-control: ['private, no-store, must-revalidate']
+      connection: [keep-alive]
+      content-length: ['83']
+      content-type: [application/json]
+      date: ['Tue, 20 Jan 2015 16:36:01 GMT']
+      expires: ['0']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=631138519]
+    status: {code: 404, message: NOT FOUND}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Accept-Language: [en;q=1]
+      Connection: [keep-alive]
+      Content-Type: [application/x-www-form-urlencoded; charset=utf-8]
+      Host: [api.vineapp.com]
+      Proxy-Connection: [keep-alive]
+      User-Agent: [iphone/172 (iPad; iOS 7.0.4; Scale/2.00)]
+      X-Vine-Client: [ios/2.5.1]
+      vine-session-id: [!!python/unicode 1169361810303164416-7508513e-8757-485a-9fba-9870d111e3e5]
+    method: GET
+    uri: https://api.vineapp.com:443/users/1169361810303164416/conversations
+  response:
+    body: {string: !!python/unicode '{"code": "", "data": {"count": 0, "anchorStr":
+        "0", "records": [], "previousPage": null, "backAnchor": "", "anchor": 0, "nextPage":
+        null, "size": 20}, "success": true, "error": ""}'}
+    headers:
+      cache-control: ['private, no-store, must-revalidate']
+      connection: [keep-alive]
+      content-length: ['180']
+      content-type: [application/json]
+      date: ['Tue, 20 Jan 2015 16:47:04 GMT']
+      expires: ['0']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=631138519]
+    status: {code: 200, message: OK}
+version: 1

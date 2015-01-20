@@ -25,7 +25,6 @@ timeline = user.timeline()
 ## Documentation
 
 *Work in progress*
-check ``
 
 ## Acknowledgements
 

@@ -6,3 +6,17 @@ TO DO
   + Replace all attributes with postCapital: postId, postVerified, etc with just the value
 * Check if there is an endpoint to delete an account, maybe `DELETE users`
 * Parse Forsquare venue data and create an object that can interact with the Forsquare API
+* Loops
+* Favorites
+* VMs
+* Add vine errors with better descriptions
+* Move methods from models to utils
+* Upload video!
+* Docstrings
+
+
+
+Tests
+
+    * Nose
+    * VCR.py
