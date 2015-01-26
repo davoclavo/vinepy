@@ -1,19 +1,9 @@
 import json
-from datetime import datetime
 from sys import stdout
 from errors import *
+from utils import *
 
-def strptime(string, fmt='%Y-%m-%dT%H:%M:%S.%f'):
-    return datetime.strptime(string, fmt)
-
-# From http://stackoverflow.com/a/14620633
-# CAUTION: it causes memory leak in < 2.7.3 and < 3.2.3
-class AttrDict(dict):
-    def __init__(self, *args, **kwargs):
-        super(AttrDict, self).__init__(*args, **kwargs)
-        self.__dict__ = self
-
-# from_json decorator
+# Model.from_json json pre-parser
 def parse_vine_json(fn):
     def _decorator(self, *args, **kwargs):
         self = fn(self, *args, **kwargs)
@@ -26,8 +16,7 @@ def parse_vine_json(fn):
             value = self[key]
 
             if key == vineId:
-                self['id'] = self[vineId]
-                # del self[vineId]
+                self['id'] = value
             elif key == 'userId':
                 self['user'] = User.from_id(value)
             elif key == 'postId':
@@ -56,11 +45,39 @@ def parse_vine_json(fn):
             'notification': 'notificationTypeId',
 
             'like': 'postId',
-            'repost': 'postId'
+            'repost': 'postId',
+            'conversation': 'conversationId',
+            'message': 'message'
         }.get(classname)
         self['name'] = self.get(name_attr, '<Unknown>')
 
         return self
+    return _decorator
+
+# Ensure ownership of the object, to avoid wasting an request
+def ensure_ownership(fn):
+    def _decorator(self, *args, **kwargs):
+        user_id = self.get('post',{}).get('user',{}).get('id') or self.get('user',{}).get('id') or self.id
+        if(user_id == self.api._user_id):
+            return fn(self, *args, **kwargs)
+        else:
+            raise VineError(4, "You don't have permission to access that record.")
+            # raise VineError(1, "Only %s can access this record." % self)
+    return _decorator
+
+# Chain instance methods
+def chained(fn):
+    def _decorator(self, *args, **kwargs):
+        fn(self, *args, **kwargs)
+        return self
+    return _decorator
+
+# Inject Post into child
+def inject_post(fn):
+    def _decorator(self, *args, **kwargs):
+        obj = fn(self, *args, **kwargs)
+        obj.post = self
+        return obj
     return _decorator
 
 
@@ -153,7 +170,7 @@ class MetaModelCollection(Model):
         return len(self.get_collection())
 
     def __getitem__(self, descriptor):
-        # Retrieving an attribute
+        # Retrieving metadata
         if type(descriptor) in [str, unicode]:
             return Model.__getitem__(self, descriptor)
 
@@ -173,22 +190,6 @@ class MetaModelCollection(Model):
     def get_collection(self):
         return self.get(self.model_key, [])
 
-# Ensure ownership of the object, to avoid wasting an request
-def ensure_ownership(fn):
-    def _decorator(self, *args, **kwargs):
-        user_id = self.get('post',{}).get('user',{}).get('id') or self.get('user',{}).get('id') or self.id
-        if(user_id == self.api._user_id):
-            return fn(self, *args, **kwargs)
-        else:
-            raise VineError(4, "You don't have permission to access that record.")
-            # raise VineError(1, "Only %s can access this record." % self)
-    return _decorator
-
-def chained(fn):
-    def _decorator(self, *args, **kwargs):
-        fn(self, *args, **kwargs)
-        return self
-    return _decorator
 
 class User(Model):
     def connect_api(self, api):
@@ -207,12 +208,15 @@ class User(Model):
         return self.api.unfollow(user_id=user.id, **kwargs)
 
     @chained
-    def block(self, **kwargs):
-        return self.api.block(user_id=self.id, **kwargs)
+    def block(self, user=None, **kwargs):
+        user = user or self
+        return self.api.block(user_id=user.id, **kwargs)
 
     @chained
-    def unblock(self, **kwargs):
-        return self.api.unblock(user_id=self.id, **kwargs)
+    def unblock(self, user=None, **kwargs):
+        user = user or self
+
+        return self.api.unblock(user_id=user.id, **kwargs)
 
     def followers(self, **kwargs):
         return self.api.get_followers(user_id=self.id, **kwargs)
@@ -262,13 +266,6 @@ class User(Model):
         return bool(self._attrs.blocked)
 
 
-def inject_post(fn):
-    def _decorator(self, *args, **kwargs):
-        obj = fn(self, *args, **kwargs)
-        obj.post = self
-        return obj
-    return _decorator
-
 class Post(Model):
     @inject_post
     def like(self, **kwargs):
@@ -302,7 +299,6 @@ class Post(Model):
             _comment = comment
 
         return self.api.comment(post_id=self.id, comment=_comment, entities=entities, **kwargs)
-
 
     @chained
     def report(self, **kwargs):
@@ -435,3 +431,23 @@ class NotificationCollection(MetaModelCollection):
 
 class PureEntityCollection(ModelCollection):
     model = Entity
+
+class Conversation(Model):
+    pass
+
+class PureConversationCollection(ModelCollection):
+    model = Conversation
+
+class ConversationCollection(MetaModelCollection):
+    collection_class = PureConversationCollection
+
+
+class Message(Model):
+    pass
+
+class PureMessageCollection(ModelCollection):
+    model = Message
+
+class MessageCollection(MetaModelCollection):
+    collection_class = PureMessageCollection
+    model_key = 'messages'

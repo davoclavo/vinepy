@@ -2,9 +2,7 @@ from models import *
 
 PROTOCOL = 'https'
 API_HOST = 'api.vineapp.com'
-# API_HOST = 'api-dev.vineapp.com'
 MEDIA_HOST = 'media.vineapp.com'
-# MEDIA_HOST = 'media-dev.vineapp.com'
 
 HEADERS = {
     'Host':              'api.vineapp.com',
@@ -21,8 +19,6 @@ HEADERS = {
 
 OPTIONAL_PARAMS = ['size', 'page', 'anchor']
 
-DEVICE_TOKEN = 'a3352a79c3e29053a03a2e6eb89587648f5b2a291c709708816ec768d058ea45'
-
 ENDPOINTS = {
 
     # Auth
@@ -32,7 +28,7 @@ ENDPOINTS = {
         'url_params': [],
         'required_params': ['username', 'password'],
         'optional_params': ['deviceToken'],
-        'default_params': [('deviceToken', DEVICE_TOKEN)],
+        'default_params': [],
         'model': User
     },
     'logout': {

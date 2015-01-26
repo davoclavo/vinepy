@@ -1,9 +1,9 @@
 import sys, os
-sys.path.append('/'.join(os.path.dirname(os.path.abspath(__file__)).split('/')[:-1]))
 
 import vcr
 import vinepy
-from nose.tools import *
+
+from nose2.compat import unittest
 
 
 my_vcr = vcr.VCR(
@@ -13,35 +13,85 @@ my_vcr = vcr.VCR(
     # record_mode = 'all' # Re-record cassettes
 )
 
-class TestVinepy:
+
+class TestAPI(unittest.TestCase):
     @my_vcr.use_cassette('login.yml')
     @classmethod
-    def setup_class(cls):
+    def setUp(cls):
         cls.vine_name = 'Bob Testy'
         cls.vine_email = 'bobtesty@suremail.info'
         cls.vine_password = 'password'
         cls.api = vinepy.API(username=cls.vine_email, password=cls.vine_password)
- 
-    @classmethod
-    def teardown_class(cls):
-        pass
-
 
     @my_vcr.use_cassette('signup.yml')
     def test_signup(self):
         api = vinepy.API().signup(username=self.vine_name, email=self.vine_email, password=self.vine_password)
-        assert_equals(api.username, self.vine_name)
+        self.assertEqual(api.username, self.vine_name)
 
     @my_vcr.use_cassette('tag_timeline.yml')
     def test_get_tag_timeline(self):
         timeline = self.api.get_tag_timeline(tag_name='LNV')
         assert(timeline._attrs)
 
+    @my_vcr.use_cassette('vm_friends_inbox.yml')
+    def test_get_friends_inbox(self):
+        conversations = self.api.get_conversations(user_id=self.api.user.userId)
+        assert(conversations._attrs)
+
     @my_vcr.use_cassette('get_post.yml')
     def test_get_post(self):
         post_id = 1167619641938518016
-
         # Retrieves PostCollection
         post = self.api.get_post(post_id=post_id)[0]
-        assert_equals(post.id, post_id)
-        assert_equals(post.name, 'In-N-Out vs. Shake Shack: The Ultimate Battle')
+        self.assertEqual(post.id, post_id)
+        self.assertEqual(post.name, 'In-N-Out vs. Shake Shack: The Ultimate Battle')
+
+    def test_custom_device_token(self):
+        with my_vcr.use_cassette('login-custom-device-token.yml') as cass:
+            custom_device_token = 'a3352a79c3e29283a03a2e6eb89587648f5b2a291c709708816ec768d058ea45'
+            api = vinepy.API(username=self.vine_email, password=self.vine_password, device_token=custom_device_token)
+            self.assertIn(custom_device_token, cass.requests[0].body)
+            self.assertEqual(api.username, self.vine_email)
+
+class TestModel(unittest.TestCase):
+    # Model method tests
+    def test_model_from_json(self):
+        mock_json = {'id': 1,
+                     'from_json': 'something'
+                    }
+        model = vinepy.Model.from_json(mock_json)
+        self.assertEqual(model['id'], mock_json['id'])
+        # Does not replace an existing key
+        self.assertNotEqual(model.from_json, mock_json['from_json'])
+
+        # classname + 'Id' replaces 'id' key
+        mock_json['modelId'] = 2
+        model = vinepy.Model.from_json(mock_json)
+        self.assertEqual(model.id, mock_json['modelId'])
+
+
+    def test_model_from_id(self):
+        _id = 123
+        model = vinepy.Model.from_id(_id)
+        self.assertEqual(_id, model.id)
+
+    def test_model_repr(self):
+        # Check all valid scenarios produce a valid repr
+        _id = 123
+        model = vinepy.Model.from_json({'id': _id})
+        self.assertEqual(repr(model), "<Model [%s] '<Unknown>'>" % _id)
+
+
+class TestDecorator(unittest.TestCase):
+    # Decorator tests
+    def test_vine_json(self):
+        pass
+
+    def test_ensure_ownership(self):
+        pass
+
+    def test_chained(self):
+        pass
+
+    def test_inject_post(self):
+        pass

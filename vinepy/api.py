@@ -7,16 +7,20 @@ from errors import *
 
 from functools import partial
 from json import dumps
+import os, binascii
 
 class API(object):
-    def __init__(self, username=None, password=None, DEBUG=False):
+    def __init__(self, username=None, password=None, device_token=None, DEBUG=False):
         self.username = username
         self.password = password
         self._session_id = None
         self.DEBUG = DEBUG
+        self.device_token = device_token or binascii.b2a_hex(os.urandom(32))
 
         self._make_dynamic_methods()
-        self.user = self.login(username=username, password=password) if self.username and self.password else None
+
+        if self.username and self.password:
+            self.user = self.login(username=username, password=password, device_token=self.device_token)
 
 
     def _make_dynamic_methods(self):
@@ -124,7 +128,7 @@ class API(object):
                           "https" : https_proxy,
                       }
 
-            # cafile='/home/dav/.mitmproxy/mitmproxy-ca-cert.pem'
+            # cafile='~/.mitmproxy/mitmproxy-ca-cert.pem'
             cafile=False
             response = requests.request(meta['request_type'], url, params=built_params, data=built_data, headers=headers, verify=cafile, proxies=proxies)
             print 'REQUESTED: %s [%s]' % (url, response.status_code)
