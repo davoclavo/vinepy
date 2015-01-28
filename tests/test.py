@@ -95,3 +95,15 @@ class TestDecorator(unittest.TestCase):
 
     def test_inject_post(self):
         pass
+
+class TestUtils(unittest.TestCase):
+    short_id = 'OjunvOxTpZ5'
+    long_id = 1167619641938518016
+
+    def test_post_long_id(self):
+        long_id = vinepy.post_long_id(self.short_id)
+        self.assertEqual(self.long_id, long_id)
+
+    def test_post_short_id(self):
+        short_id = vinepy.post_short_id(self.long_id)
+        self.assertEqual(self.short_id, short_id)
