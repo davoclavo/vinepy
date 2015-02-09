@@ -1,7 +1,11 @@
+[![](https://travis-ci.org/davoclavo/vinepy.svg?branch=master)](https://travis-ci.org/davoclavo/vinepy)
+
+
 vinepy
 ======
 
 *Python wrapper for the [Vine](https://vine.co) API*
+
 
 ## Installation
 
