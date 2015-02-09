@@ -39,3 +39,7 @@ nosetests.xml
 
 # Virtualenv
 .venv
+vinepy3
+
+# Backups
+*.bak

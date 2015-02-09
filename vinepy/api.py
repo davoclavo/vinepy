@@ -27,7 +27,7 @@ class API(object):
                 username=username, password=password, device_token=self.device_token)
 
     def _make_dynamic_methods(self):
-        for endpoint in ENDPOINTS.keys():
+        for endpoint in list(ENDPOINTS.keys()):
             def _inner(endpoint, *args, **kwargs):
                 return self.api_call(endpoint, *args, **kwargs)
             _inner.__name__ = endpoint
@@ -74,7 +74,7 @@ class API(object):
         data_params = kwargs
         if meta.get('default_params', []) != []:
             default_params = dict(meta['default_params'])
-            data_params = dict(default_params.items() + kwargs.items())
+            data_params = dict(list(default_params.items()) + list(kwargs.items()))
 
         missing_params = []
         for param in meta['required_params']:

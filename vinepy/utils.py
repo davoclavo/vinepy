@@ -1,4 +1,5 @@
 from datetime import datetime
+from functools import reduce
 
 VINE_HASHING_KEY = 'BuzaW7ZmKAqbhMOei5J1nvr6gXHwdpDjITtFUPxQ20E9VY3Ll'
 index_key_dict = dict([(char, index)
@@ -30,7 +31,7 @@ def int2base(x, base):
     digits = []
     while x:
         digits.append(x % base)
-        x /= base
+        x //= base
     if sign < 0:
         digits.append('-')
     digits.reverse()

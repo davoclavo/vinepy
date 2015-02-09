@@ -3,10 +3,8 @@ from sys import stdout
 from .errors import *
 from .utils import *
 
-# Model.from_json json pre-parser
-
-
 def parse_vine_json(fn):
+    """Vine json pre-parser"""
     def _decorator(self, *args, **kwargs):
         self = fn(self, *args, **kwargs)
 
@@ -101,7 +99,7 @@ class Model(AttrDict):
         self = cls()
         self._attrs = AttrDict(data)
         self.json = json.dumps(data)
-        for key, value in self._attrs.items():
+        for key, value in list(self._attrs.items()):
             if key not in dir(self):
                 self[key] = value
         return self
@@ -122,19 +120,12 @@ class Model(AttrDict):
             name = str(name)
         else:
             # description, usernames and comments may contain weird chars
-            name = name.encode(stdout.encoding)
+            # name = name.encode(stdout.encoding)
             max_chars = 10
             name = name[:max_chars] + (name[max_chars:] and '...')
 
         return "<%s [%s] '%s'>" % (classname, self.id, name)
 
-        # belongs_to = self.get('belongs_to')
-        # if belongs_to:
-        #     belongs_to = '[%s]' % belongs_to
-        # else:
-        #     belongs_to = ''
-
-        # return '%s[%s:%s%s]' % (classname, id_, name, belongs_to)
 
 
 class ModelCollection(list):
@@ -155,8 +146,8 @@ class ModelCollection(list):
         self._iterator = list.__iter__(self)
         return self._iterator
 
-    def next(self):
-        return self._iterator.next()
+    def __next__(self):
+        return next(self._iterator)
 
 
 # Model collection with metadata
@@ -167,7 +158,7 @@ class MetaModelCollection(Model):
     @classmethod
     def from_json(cls, data):
         self = cls(Model.from_json(data))
-        for key, value in self.items():
+        for key, value in list(self.items()):
             if key == self.model_key:
                 value = self.collection_class.from_json(value)
             self[key] = value
@@ -182,7 +173,7 @@ class MetaModelCollection(Model):
 
     def __getitem__(self, descriptor):
         # Retrieving metadata
-        if type(descriptor) in [str, unicode]:
+        if type(descriptor) in [str, str]:
             return Model.__getitem__(self, descriptor)
 
         # Retrieving an element from the list
@@ -195,8 +186,8 @@ class MetaModelCollection(Model):
     def __repr__(self):
         return self.get_collection().__repr__()
 
-    def next(self):
-        return self.get_collection().next()
+    def __next__(self):
+        return next(self.get_collection())
 
     def get_collection(self):
         return self.get(self.model_key, [])
@@ -206,7 +197,7 @@ class User(Model):
 
     def connect_api(self, api):
         self.api = api
-        if('key' in self.keys()):
+        if('key' in list(self.keys())):
             self.api.authenticate(self)
 
     @chained
