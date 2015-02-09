@@ -9,7 +9,7 @@ def main():
     tag_timeline = vine.get_tag_timeline(tag_name='LNV')
 
     for post in tag_timeline:
-        print post.shareUrl
+        print(post.shareUrl)
 
 if __name__ == '__main__':
     main()

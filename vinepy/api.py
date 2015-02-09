@@ -1,9 +1,9 @@
 # add check if requests is installed
 import requests
 
-from models import *
-from endpoints import *
-from errors import *
+from .models import *
+from .endpoints import *
+from .errors import *
 
 from functools import partial
 from json import dumps

@@ -1,7 +1,7 @@
 import json
 from sys import stdout
-from errors import *
-from utils import *
+from .errors import *
+from .utils import *
 
 # Model.from_json json pre-parser
 
@@ -14,7 +14,7 @@ def parse_vine_json(fn):
         classname = self.__class__.__name__.lower()
         vineId = classname + 'Id'
 
-        for key in self.keys():
+        for key in list(self.keys()):
             value = self[key]
 
             if key == vineId:
@@ -56,10 +56,10 @@ def parse_vine_json(fn):
         return self
     return _decorator
 
-# Ensure ownership of the object, to avoid wasting an request
-
 
 def ensure_ownership(fn):
+    """Ensure ownership of the object, to avoid wasting a request"""
+
     def _decorator(self, *args, **kwargs):
         user_id = self.get('post', {}).get('user', {}).get(
             'id') or self.get('user', {}).get('id') or self.id
@@ -68,22 +68,23 @@ def ensure_ownership(fn):
         else:
             raise VineError(
                 4, "You don't have permission to access that record.")
-            # raise VineError(1, "Only %s can access this record." % self)
     return _decorator
-
-# Chain instance methods
 
 
 def chained(fn):
+    """Chain instance methods
+    Can do things like user.unfollow().follow().unfollow()
+    """
+
     def _decorator(self, *args, **kwargs):
         fn(self, *args, **kwargs)
         return self
     return _decorator
 
-# Inject Post into child
-
 
 def inject_post(fn):
+    """Inject Post into child model"""
+
     def _decorator(self, *args, **kwargs):
         obj = fn(self, *args, **kwargs)
         obj.post = self
@@ -100,7 +101,7 @@ class Model(AttrDict):
         self = cls()
         self._attrs = AttrDict(data)
         self.json = json.dumps(data)
-        for key, value in self._attrs.iteritems():
+        for key, value in self._attrs.items():
             if key not in dir(self):
                 self[key] = value
         return self
@@ -166,7 +167,7 @@ class MetaModelCollection(Model):
     @classmethod
     def from_json(cls, data):
         self = cls(Model.from_json(data))
-        for key, value in self.iteritems():
+        for key, value in self.items():
             if key == self.model_key:
                 value = self.collection_class.from_json(value)
             self[key] = value

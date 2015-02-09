@@ -1,4 +1,4 @@
-from models import *
+from .models import *
 
 PROTOCOL = 'https'
 API_HOST = 'api.vineapp.com'
