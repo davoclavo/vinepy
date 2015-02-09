@@ -5,7 +5,7 @@ index_key_dict = dict([(char, index) for index, char in enumerate(VINE_HASHING_K
 
 def post_long_id(short_id):
     prepared_hash = enumerate(short_id[::-1])
-    long_id = reduce(lambda acc, (index, key): acc + index_key_dict[key] * len(VINE_HASHING_KEY)**index, prepared_hash, 0)
+    long_id = reduce(lambda acc, index_key: acc + index_key_dict[index_key[1]] * len(VINE_HASHING_KEY)**index_key[0], prepared_hash, 0)
     return long_id
 
 def post_short_id(long_id):

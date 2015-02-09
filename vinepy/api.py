@@ -131,7 +131,7 @@ class API(object):
             # cafile='~/.mitmproxy/mitmproxy-ca-cert.pem'
             cafile=False
             response = requests.request(meta['request_type'], url, params=built_params, data=built_data, headers=headers, verify=cafile, proxies=proxies)
-            print 'REQUESTED: %s [%s]' % (url, response.status_code)
+            print('REQUESTED: %s [%s]' % (url, response.status_code))
         else:
             response = requests.request(meta['request_type'], url, params=built_params, data=built_data, headers=headers)
 
