@@ -4,6 +4,8 @@ from errors import *
 from utils import *
 
 # Model.from_json json pre-parser
+
+
 def parse_vine_json(fn):
     def _decorator(self, *args, **kwargs):
         self = fn(self, *args, **kwargs)
@@ -55,17 +57,23 @@ def parse_vine_json(fn):
     return _decorator
 
 # Ensure ownership of the object, to avoid wasting an request
+
+
 def ensure_ownership(fn):
     def _decorator(self, *args, **kwargs):
-        user_id = self.get('post',{}).get('user',{}).get('id') or self.get('user',{}).get('id') or self.id
+        user_id = self.get('post', {}).get('user', {}).get(
+            'id') or self.get('user', {}).get('id') or self.id
         if(user_id == self.api._user_id):
             return fn(self, *args, **kwargs)
         else:
-            raise VineError(4, "You don't have permission to access that record.")
+            raise VineError(
+                4, "You don't have permission to access that record.")
             # raise VineError(1, "Only %s can access this record." % self)
     return _decorator
 
 # Chain instance methods
+
+
 def chained(fn):
     def _decorator(self, *args, **kwargs):
         fn(self, *args, **kwargs)
@@ -73,6 +81,8 @@ def chained(fn):
     return _decorator
 
 # Inject Post into child
+
+
 def inject_post(fn):
     def _decorator(self, *args, **kwargs):
         obj = fn(self, *args, **kwargs)
@@ -92,7 +102,7 @@ class Model(AttrDict):
         self.json = json.dumps(data)
         for key, value in self._attrs.iteritems():
             if key not in dir(self):
-                 self[key] = value
+                self[key] = value
         return self
 
     @classmethod
@@ -192,6 +202,7 @@ class MetaModelCollection(Model):
 
 
 class User(Model):
+
     def connect_api(self, api):
         self.api = api
         if('key' in self.keys()):
@@ -252,7 +263,6 @@ class User(Model):
     def unset_explicit(self, **kwargs):
         return self.api.unset_explicit(user_id=self.id, **kwargs)
 
-
     def is_following(self):
         return bool(self._attrs.following)
 
@@ -267,6 +277,7 @@ class User(Model):
 
 
 class Post(Model):
+
     @inject_post
     def like(self, **kwargs):
         return self.api.like(post_id=self.id, **kwargs)
@@ -288,11 +299,11 @@ class Post(Model):
                     _comment += element
                 else:
                     entity = {
-                            'id':element.id,
-                            'range': [len(_comment), len(_comment)+len(element.name)],
-                            'type': 'mention',
-                            'title': element.name
-                            }
+                        'id': element.id,
+                        'range': [len(_comment), len(_comment) + len(element.name)],
+                        'type': 'mention',
+                        'title': element.name
+                    }
                     _comment += element.name + ' '
                     entities.append(entity)
         else:
@@ -315,6 +326,7 @@ class Post(Model):
 
 
 class Comment(Model):
+
     @ensure_ownership
     def delete(self, **kwargs):
         return self.api.uncomment(post_id=self.post.id, comment_id=self.id, **kwargs)
@@ -322,6 +334,7 @@ class Comment(Model):
 
 
 class Like(Model):
+
     @ensure_ownership
     def delete(self, **kwargs):
         return self.api.unlike(post_id=self.post.id, **kwargs)
@@ -329,6 +342,7 @@ class Like(Model):
 
 
 class Repost(Model):
+
     @ensure_ownership
     def delete(self, **kwargs):
         return self.api.unrevine(post_id=self.post.id, revine_id=self.id, **kwargs)
@@ -336,11 +350,13 @@ class Repost(Model):
 
 
 class Tag(Model):
+
     def timeline(self, **kwargs):
         return self.api.get_tag_timeline(tag_name=self.tag, **kwargs)
 
 
 class Channel(Model):
+
     def timeline(self, **kwargs):
         return self.api.get_channel_recent_timeline(channel_id=self.id, **kwargs)
 
@@ -361,6 +377,14 @@ class Entity(Model):
 
 
 class Venue(Model):
+    pass
+
+
+class Conversation(Model):
+    pass
+
+
+class Message(Model):
     pass
 
 
@@ -432,21 +456,18 @@ class NotificationCollection(MetaModelCollection):
 class PureEntityCollection(ModelCollection):
     model = Entity
 
-class Conversation(Model):
-    pass
 
 class PureConversationCollection(ModelCollection):
     model = Conversation
+
 
 class ConversationCollection(MetaModelCollection):
     collection_class = PureConversationCollection
 
 
-class Message(Model):
-    pass
-
 class PureMessageCollection(ModelCollection):
     model = Message
+
 
 class MessageCollection(MetaModelCollection):
     collection_class = PureMessageCollection

@@ -1,4 +1,4 @@
-#add check if requests is installed
+# add check if requests is installed
 import requests
 
 from models import *
@@ -7,9 +7,12 @@ from errors import *
 
 from functools import partial
 from json import dumps
-import os, binascii
+import os
+import binascii
+
 
 class API(object):
+
     def __init__(self, username=None, password=None, device_token=None, DEBUG=False):
         self.username = username
         self.password = password
@@ -20,8 +23,8 @@ class API(object):
         self._make_dynamic_methods()
 
         if self.username and self.password:
-            self.user = self.login(username=username, password=password, device_token=self.device_token)
-
+            self.user = self.login(
+                username=username, password=password, device_token=self.device_token)
 
     def _make_dynamic_methods(self):
         for endpoint in ENDPOINTS.keys():
@@ -64,7 +67,8 @@ class API(object):
                 url_params.append(p)
                 del kwargs[param]
         if missing_params:
-            raise ParameterError('Missing URL parameters: [%s]' % ', '.join(missing_params))
+            raise ParameterError(
+                'Missing URL parameters: [%s]' % ', '.join(missing_params))
 
         # url_params shouldnt have default params, I guess
         data_params = kwargs
@@ -78,7 +82,8 @@ class API(object):
             if p is None:
                 missing_params.append(param)
         if missing_params:
-            raise ParameterError('Missing required parameters: [%s]' % ', '.join(missing_params))
+            raise ParameterError(
+                'Missing required parameters: [%s]' % ', '.join(missing_params))
 
         # Check for unsupported params?
 
@@ -120,20 +125,22 @@ class API(object):
         if(self.DEBUG):
             # pip install mitmproxy
             # mitmproxy
-            http_proxy  = "http://localhost:8080"
+            http_proxy = "http://localhost:8080"
             https_proxy = "http://localhost:8080"
 
             proxies = {
-                          "http"  : http_proxy,
-                          "https" : https_proxy,
-                      }
+                "http": http_proxy,
+                "https": https_proxy,
+            }
 
             # cafile='~/.mitmproxy/mitmproxy-ca-cert.pem'
-            cafile=False
-            response = requests.request(meta['request_type'], url, params=built_params, data=built_data, headers=headers, verify=cafile, proxies=proxies)
+            cafile = False
+            response = requests.request(
+                meta['request_type'], url, params=built_params, data=built_data, headers=headers, verify=cafile, proxies=proxies)
             print('REQUESTED: %s [%s]' % (url, response.status_code))
         else:
-            response = requests.request(meta['request_type'], url, params=built_params, data=built_data, headers=headers)
+            response = requests.request(
+                meta['request_type'], url, params=built_params, data=built_data, headers=headers)
 
         if response.headers.get('X-Upload-Key'):
             return response.headers['X-Upload-Key']
@@ -142,7 +149,8 @@ class API(object):
             try:
                 json = response.json()
             except:
-                raise VineError(1000, 'Vine replied with non-json content:\n' + response.text)
+                raise VineError(
+                    1000, 'Vine replied with non-json content:\n' + response.text)
 
             if json['success'] is not True:
                 raise VineError(json['code'], json['error'])

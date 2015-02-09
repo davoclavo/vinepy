@@ -1,4 +1,5 @@
 class VineError(Exception):
+
     def __init__(self, code, error):
         self.code = code
         self.error = error
@@ -8,6 +9,7 @@ class VineError(Exception):
 
 
 class ParameterError(Exception):
+
     def __init__(self, description):
         self.description = description
 
