@@ -1,22 +1,49 @@
 TO DO
 =====
 
-* Remove additional attributes like username/userId from Post, replace them with a User
-* Replace the remove userId, postId ,etc with a generic method
-  + Replace all attributes with postCapital: postId, postVerified, etc with just the value
-* Check if there is an endpoint to delete an account, maybe `DELETE users`
-* Parse Forsquare venue data and create an object that can interact with the Forsquare API
-* Loops
-* Favorites
-* VMs
-* Add vine errors with better descriptions
-* Move methods from models to utils
-* Upload video!
-* Docstrings
+Refactors
+---------
 
+- [x] Move methods from models to utils
+- [ ] Python3 + PEP8
+- [ ] Docstrings
+- [ ] *args, **kwargs everywhere?
+- [ ] _attrs
+- [ ] VineErrors with better descriptions
+
+
+Endpoints
+---------
+
+- [ ] VMs
+- [ ] Loops
+- [ ] Favorites
+- [ ] Delete account
+- [ ] Add a `public` attribute for public endpoints
 
 
 Tests
+-----
 
-    * Nose
-    * VCR.py
+- [x] Nose2
+- [x] vcrpy
+- [ ] Travis CI
+- [ ] 100% coverage baby
+- [ ] Automated PyPI deploy if build passes
+
+
+Examples
+--------
+
+- [ ] Upload video
+- [ ] Send VM
+
+
+Ideas
+-----
+
+- [ ] Parse Forsquare venue data and create an object that can interact with the Forsquare API
+- [ ] Generator for paginations
+- [ ] Nested endpoints
+- [ ] Request timed context, remember we are using a private api, we don't want them to get angry
+
