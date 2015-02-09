@@ -159,6 +159,36 @@ ENDPOINTS = {
         'model': UserCollection
     },
 
+    'get_conversations': {
+        'endpoint': 'users/%s/conversations',
+        'request_type': 'get',
+        'url_params': ['user_id'],
+        'required_params': [],
+        'optional_params': ['inbox'],
+        'model': ConversationCollection
+    },
+
+
+    'start_conversation': {
+        'endpoint': 'conversations',
+        'request_type': 'post',
+        'json': True,
+        'url_params': [],
+        'required_params': ['created', 'locale', 'message', 'to'],
+        'optional_params': [],
+        'model': MessageCollection
+    },
+
+    'converse': {
+        'endpoint': 'conversations/%s',
+        'request_type': 'post',
+        'json': True,
+        'url_params': ['conversation_id'],
+        'required_params': ['created', 'locale', 'message'],
+        'optional_params': [],
+        'model': MessageCollection
+    },
+
     # Posts actions
     'like': {
         'endpoint': 'posts/%s/likes',
@@ -401,7 +431,7 @@ ENDPOINTS = {
     },
     'upload_thumb': {
         'host': MEDIA_HOST,
-        'endpoint': 'upload/thumbs/1.3.1.mp4.jpg',
+        'endpoint': 'upload/thumbs/2.5.1.15482401929932289311.mp4.jpg?private=1',
         'request_type': 'put',
         'url_params': [],
         'required_params': ['filename'],
@@ -410,13 +440,11 @@ ENDPOINTS = {
     },
     'upload_video': {
         'host': MEDIA_HOST,
-        'endpoint': 'upload/videos/1.3.1.mp4',
+        'endpoint': 'upload/videos/2.5.1.15482401929932289311.mp4?private=1',
         'request_type': 'put',
         'url_params': [],
         'required_params': ['filename'],
         'optional_params': [],
         'model': None
     },
-
-
 }
