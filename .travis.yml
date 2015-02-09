@@ -5,7 +5,10 @@ python:
   - '3.2'
   - '3.3'
   - '3.4'
-install:
-  - pip install .
-  - pip install -r requirements.txt
+deploy:
+  provider: pypi
+  user: davoclavo
+  password:
+    secure: ib4iaqycgcF3ijSeUAvOkPWUJe3K0Y0Iha23GaUXfCkYykIEBBTc830co418dNXHA1dDBCpopfFxnAmplZlWzCakqXFQqZttaRMSQ4jgp6tsbUdLbAd4Zgitobr04oWs3xb3fGKCkCx8c+ZrfadSHmKLj63XKhtIeClfEt/LdsQ=
+install: pip install .
 script: nose2
