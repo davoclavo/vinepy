@@ -211,6 +211,16 @@ class User(Model):
         return self.api.unfollow(user_id=user.id, **kwargs)
 
     @chained
+    def follow_notifications(self, user=None, **kwargs):
+        user = user or self
+        return self.api.follow_notifications(user_id=user.id, **kwargs)
+
+    @chained
+    def unfollow_notifications(self, user=None, **kwargs):
+        user = user or self
+        return self.api.unfollow_notifications(user_id=user.id, **kwargs)
+
+    @chained
     def block(self, user=None, **kwargs):
         user = user or self
         return self.api.block(user_id=user.id, **kwargs)
@@ -266,6 +276,9 @@ class User(Model):
 
     def is_blocked(self):
         return bool(self._attrs.blocked)
+
+    def is_notifying(self):
+        return bool(self._attrs.notifyPosts)
 
 
 class Post(Model):

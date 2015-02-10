@@ -53,12 +53,28 @@ class TestAPI(unittest.TestCase):
             post.name, 'In-N-Out vs. Shake Shack: The Ultimate Battle')
 
     def test_custom_device_token(self):
-        with my_vcr.use_cassette('login-custom-device-token.yml') as cass:
+        with my_vcr.use_cassette('login-custom-device-token.yml') as cassette:
             custom_device_token = 'a3352a79c3e29283a03a2e6eb89587648f5b2a291c709708816ec768d058ea45'
             api = vinepy.API(
                 username=self.vine_email, password=self.vine_password, device_token=custom_device_token)
-            self.assertIn(custom_device_token, cass.requests[0].body)
+            self.assertIn(custom_device_token, cassette.requests[0].body)
             self.assertEqual(api.username, self.vine_email)
+
+    def test_user_notifications(self):
+        api = vinepy.API(username=self.vine_email, password=self.vine_password)
+        user_id = 948731399408640000
+
+        with my_vcr.use_cassette('unfollow_notifications.yml') as cassette:
+            api.unfollow_notifications(user_id=user_id)
+            user = api.get_user(user_id=user_id)
+            self.assertTrue(user.is_following())
+            self.assertFalse(user.is_notifying())
+
+        with my_vcr.use_cassette('follow_notifications.yml') as cassette:
+            api.follow_notifications(user_id=user_id)
+            user = api.get_user(user_id=user_id)
+            self.assertTrue(user.is_following())
+            self.assertTrue(user.is_notifying())
 
 
 class TestModel(unittest.TestCase):

@@ -1,0 +1,66 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Accept-Language: [en;q=1]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/x-www-form-urlencoded; charset=utf-8]
+      Host: [api.vineapp.com]
+      Proxy-Connection: [keep-alive]
+      User-Agent: [iphone/172 (iPad; iOS 7.0.4; Scale/2.00)]
+      X-Vine-Client: [ios/2.5.1]
+      vine-session-id: [!!python/unicode 1169361810303164416-1ba6acf7-d897-45ae-8640-cd9484acf5b7]
+    method: DELETE
+    uri: https://api.vineapp.com:443/users/948731399408640000/followers/notifications
+  response:
+    body: {string: !!python/unicode '{"code": "", "data": {}, "success": true, "error":
+        ""}'}
+    headers:
+      cache-control: ['private, no-store, must-revalidate']
+      connection: [keep-alive]
+      content-length: ['54']
+      content-type: [application/json]
+      date: ['Tue, 10 Feb 2015 23:13:31 GMT']
+      expires: ['0']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=631138519]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Accept-Language: [en;q=1]
+      Connection: [keep-alive]
+      Content-Type: [application/x-www-form-urlencoded; charset=utf-8]
+      Host: [api.vineapp.com]
+      Proxy-Connection: [keep-alive]
+      User-Agent: [iphone/172 (iPad; iOS 7.0.4; Scale/2.00)]
+      X-Vine-Client: [ios/2.5.1]
+      vine-session-id: [!!python/unicode 1169361810303164416-1ba6acf7-d897-45ae-8640-cd9484acf5b7]
+    method: GET
+    uri: https://api.vineapp.com:443/users/profiles/948731399408640000
+  response:
+    body: {string: !!python/unicode '{"code": "", "data": {"followerCount": 195, "userId":
+        948731399408640000, "private": 0, "likeCount": 715, "postCount": 147, "explicitContent":
+        0, "blocked": 0, "verified": 0, "loopCount": 7671, "avatarUrl": "http://v.cdn.vine.co/r/avatars/98E427C03A1035848145776820224_1c1a5595066.4.7_AJeYR3l8u2pgTdFOq.rn9k3ziYHqfhul96J76ILSrFSVdIbDEbv6EeizF.XEklIf.jpg?versionId=11kNTERjSU_kj4CAcpQfGQoZrSqx3LSp",
+        "authoredPostCount": 115, "description": "Soy lo m\u00e1s viejo que he sido
+        y lo m\u00e1s joven que jam\u00e1s volver\u00e9 a ser", "location": "CDMX",
+        "username": "Davoclavo", "vanityUrls": ["davoclavo"], "following": 1, "blocking":
+        0, "shareUrl": "https://vine.co/davoclavo", "profileBackground": "0x5082e5",
+        "notifyPosts": 0, "followingCount": 288, "repostsEnabled": 1}, "success":
+        true, "error": ""}'}
+    headers:
+      cache-control: ['private, no-store, must-revalidate']
+      connection: [keep-alive]
+      content-length: ['802']
+      content-type: [application/json]
+      date: ['Tue, 10 Feb 2015 23:13:31 GMT']
+      expires: ['0']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=631138519]
+    status: {code: 200, message: OK}
+version: 1

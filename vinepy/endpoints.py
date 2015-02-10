@@ -97,11 +97,28 @@ ENDPOINTS = {
         'request_type': 'post',
         'url_params': ['user_id'],
         'required_params': [],
+        'optional_params': ['notify'], # notify=1 to follow notifications as well
+        'model': None
+    },
+    'follow_notifications': {
+        'endpoint': 'users/%s/followers/notifications',
+        'request_type': 'post',
+        'url_params': ['user_id'],
+        'required_params': ['notify'],
         'optional_params': [],
+        'default_params': [('notify', 1)],
         'model': None
     },
     'unfollow': {
         'endpoint': 'users/%s/followers',
+        'request_type': 'delete',
+        'url_params': ['user_id'],
+        'required_params': [],
+        'optional_params': [],
+        'model': None
+    },
+    'unfollow_notifications': {
+        'endpoint': 'users/%s/followers/notifications',
         'request_type': 'delete',
         'url_params': ['user_id'],
         'required_params': [],
