@@ -39,27 +39,26 @@ class API(object):
         return url
 
     def api_call(self, endpoint, *args, **kwargs):
-        # raise NotImplementedError('API endpoint for method "%s" is not found.' % endpoint)
-        meta = ENDPOINTS[endpoint]
+        metadata = ENDPOINTS[endpoint]
 
-        params = self.check_params(meta, kwargs)
+        params = self.check_params(metadata, kwargs)
 
-        response = self.do_request(meta, params)
+        response = self.do_request(metadata, params)
 
-        if meta['model'] is None:
+        if metadata['model'] is None:
             return response
         else:
-            model = meta['model'].from_json(response)
+            model = metadata['model'].from_json(response)
             model.connect_api(self)
             return model
 
-    def check_params(self, meta, kwargs):
+    def check_params(self, metadata, kwargs):
         missing_params = []
         url_params = []
 
         # page, size and anchor are data_params for get requests
 
-        for param in meta['url_params']:
+        for param in metadata['url_params']:
             p = kwargs.get(param)
             if p is None:
                 missing_params.append(param)
@@ -72,12 +71,12 @@ class API(object):
 
         # url_params shouldnt have default params, I guess
         data_params = kwargs
-        if meta.get('default_params', []) != []:
-            default_params = dict(meta['default_params'])
+        if metadata.get('default_params', []) != []:
+            default_params = dict(metadata['default_params'])
             data_params = dict(list(default_params.items()) + list(kwargs.items()))
 
         missing_params = []
-        for param in meta['required_params']:
+        for param in metadata['required_params']:
             p = data_params.get(param)
             if p is None:
                 missing_params.append(param)
@@ -89,27 +88,27 @@ class API(object):
 
         return {'url': url_params, 'data': data_params}
 
-    def do_request(self, meta, params):
+    def do_request(self, metadata, params):
         headers = HEADERS.copy()
         if params['url'] != []:
-            endpoint = meta['endpoint'] % tuple(params['url'])
+            endpoint = metadata['endpoint'] % tuple(params['url'])
         else:
-            endpoint = meta['endpoint']
+            endpoint = metadata['endpoint']
 
         host = API_HOST
         # Upload methods, change host to specific host
-        if meta.get('host'):
-            host = meta['host']
+        if metadata.get('host'):
+            host = metadata['host']
 
         url = self.build_request_url(PROTOCOL, host, endpoint)
 
         built_params = built_data = None
         built_data = data = params['data']
 
-        if meta['request_type'] == 'get':
+        if metadata['request_type'] == 'get':
             built_params = data
-        elif meta['request_type'] == 'post':
-            if meta.get('json'):
+        elif metadata['request_type'] == 'post':
+            if metadata.get('json'):
                 built_data = dumps(data)
                 headers['Content-Type'] = 'application/json; charset=utf-8'
         elif data.get('filename'):
@@ -136,16 +135,16 @@ class API(object):
             # cafile='~/.mitmproxy/mitmproxy-ca-cert.pem'
             cafile = False
             response = requests.request(
-                meta['request_type'], url, params=built_params, data=built_data, headers=headers, verify=cafile, proxies=proxies)
+                metadata['request_type'], url, params=built_params, data=built_data, headers=headers, verify=cafile, proxies=proxies)
             print('REQUESTED: %s [%s]' % (url, response.status_code))
         else:
             response = requests.request(
-                meta['request_type'], url, params=built_params, data=built_data, headers=headers)
+                metadata['request_type'], url, params=built_params, data=built_data, headers=headers)
 
         if response.headers.get('X-Upload-Key'):
             return response.headers['X-Upload-Key']
 
-        if response.status_code in [200, 400, 420]:
+        if response.status_code in [200, 400, 404, 420]:
             try:
                 json = response.json()
             except:
