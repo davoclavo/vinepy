@@ -5,7 +5,7 @@ Refactors
 ---------
 
 - [x] Move methods from models to utils
-- [ ] Python3 + PEP8
+- [x] Python3 + PEP8
 - [ ] Docstrings
 - [ ] *args, **kwargs everywhere?
 - [ ] _attrs
@@ -15,9 +15,9 @@ Refactors
 Endpoints
 ---------
 
-- [ ] VMs
+- [x] VMs
 - [ ] Loops
-- [ ] Favorites
+- [x] Favorites
 - [ ] Delete account
 - [ ] Add a `public` attribute for public endpoints
 
@@ -27,9 +27,9 @@ Tests
 
 - [x] Nose2
 - [x] vcrpy
-- [ ] Travis CI
-- [ ] 100% coverage baby
-- [ ] Automated PyPI deploy if build passes
+- [x] Travis CI
+- [x] Automated PyPI deploy if build passes
+- [ ] Coveralls
 
 
 Examples

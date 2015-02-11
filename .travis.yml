@@ -10,5 +10,9 @@ deploy:
   user: davoclavo
   password:
     secure: ib4iaqycgcF3ijSeUAvOkPWUJe3K0Y0Iha23GaUXfCkYykIEBBTc830co418dNXHA1dDBCpopfFxnAmplZlWzCakqXFQqZttaRMSQ4jgp6tsbUdLbAd4Zgitobr04oWs3xb3fGKCkCx8c+ZrfadSHmKLj63XKhtIeClfEt/LdsQ=
-install: pip install .
+install:
+  - pip install .
+  - pip install -r dev-requirements.txt
+  - pip install coveralls
 script: PYTHONPATH=. nose2 -v
+after_success: coveralls

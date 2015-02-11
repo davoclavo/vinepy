@@ -25,8 +25,13 @@ pip install vinepy
 
 ## Requirements
 
+### Usage
+
 * [requests](http://docs.python-requests.org/en/latest/)
-* [nose2](https://github.com/nose-devs/nose2)
+
+### Development
+
+* [nose2 + coverage-plugin](https://github.com/nose-devs/nose2)
 * [vcrpy](https://github.com/kevin1024/vcrpy)
 
 
@@ -43,14 +48,19 @@ timeline = user.timeline()
 
 ## Run tests
 
+### Quick run tests
 ```sh
 cd vinepy
 nose2
 ```
 
-## Documentation
+### Coverage
+```sh
+cd vinepy
+nose2 --with-coverage --coverage-report html
+open htmlcov/index.html
+```
 
-*Work in progress*
 
 ## Acknowledgements
 

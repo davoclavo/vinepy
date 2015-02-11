@@ -43,3 +43,6 @@ vinepy3
 
 # Backups
 *.bak
+
+# Coverage
+htmlcov
