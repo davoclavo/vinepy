@@ -1,4 +1,3 @@
-[![](https://travis-ci.org/davoclavo/vinepy.svg?branch=master)](https://travis-ci.org/davoclavo/vinepy)
 
 
 vinepy
@@ -6,10 +5,14 @@ vinepy
 
 *Python wrapper for the [Vine](https://vine.co) API*
 
+[![](https://travis-ci.org/davoclavo/vinepy.svg?branch=master)](https://travis-ci.org/davoclavo/vinepy)
+[![](https://img.shields.io/coveralls/davoclavo/vinepy.svg)](https://coveralls.io/r/davoclavo/vinepy)
+[![](https://img.shields.io/pypi/v/vinepy.svg)](https://pypi.python.org/pypi/vinepy)
+[![](https://img.shields.io/badge/coolness-ultrasupercool-blue.svg)](http://i.imgur.com/oJ6ZZf8.gif)
 
 ## Installation
 
-From Github
+From git
 
 ```sh
 git clone https://github.com/davoclavo/vinepy.git
@@ -17,7 +20,7 @@ cd vinepy
 python setup.py install
 ```
 
-From PyPi
+Using pip
 
 ```sh
 pip install vinepy
@@ -25,11 +28,11 @@ pip install vinepy
 
 ## Requirements
 
-### Usage
+#### Usage
 
 * [requests](http://docs.python-requests.org/en/latest/)
 
-### Development
+#### Development
 
 * [nose2 + coverage-plugin](https://github.com/nose-devs/nose2)
 * [vcrpy](https://github.com/kevin1024/vcrpy)
@@ -46,15 +49,15 @@ followers = user.followers()
 timeline = user.timeline()
 ```
 
-## Run tests
+## Tests
 
-### Quick run tests
+#### Quick run tests
 ```sh
 cd vinepy
 nose2
 ```
 
-### Coverage
+#### Coverage
 ```sh
 cd vinepy
 nose2 --with-coverage --coverage-report html
