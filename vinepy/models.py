@@ -1,5 +1,4 @@
 import json
-from sys import stdout
 from .errors import *
 from .utils import *
 
@@ -120,7 +119,8 @@ class Model(AttrDict):
             name = str(name)
         else:
             # description, usernames and comments may contain weird chars
-            # name = name.encode(stdout.encoding)
+            # name = name.encode('ascii', 'ignore') # if you want to remove emojis
+            name = name.encode('utf8')
             max_chars = 10
             name = name[:max_chars] + (name[max_chars:] and '...')
 

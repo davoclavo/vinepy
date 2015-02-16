@@ -100,10 +100,15 @@ class TestModel(unittest.TestCase):
         self.assertEqual(_id, model.id)
 
     def test_model_repr(self):
-        # Check all valid scenarios produce a valid repr
+        # No name attribute sets it to <Unknown>
         _id = 123
         model = vinepy.Model.from_json({'id': _id})
-        self.assertEqual(repr(model), "<Model [%s] '<Unknown>'>" % _id)
+        self.assertEqual(repr(model), "<Model [%s] '%s'>" % (_id, '<Unknown>'.encode('utf8')))
+
+        # Unicode name (emojis)
+        _description = u'Lmaoo\U0001f602'
+        model = vinepy.Post.from_json({'id': _id, 'description': _description})
+        self.assertEqual(repr(model), "<Post [%s] '%s'>" % (_id, _description.encode('utf8')))
 
 
 class TestDecorator(unittest.TestCase):
