@@ -106,7 +106,10 @@ class TestModel(unittest.TestCase):
         self.assertEqual(repr(model), "<Model [%s] '%s'>" % (_id, '<Unknown>'.encode('utf8')))
 
         # Unicode name (emojis)
-        _description = u'Lmaoo\U0001f602'
+        if sys.version_info.major == 3:
+            _description = 'Lmaoo\U0001f602'
+        else:
+            _description = u'Lmaoo\U0001f602'
         model = vinepy.Post.from_json({'id': _id, 'description': _description})
         self.assertEqual(repr(model), "<Post [%s] '%s'>" % (_id, _description.encode('utf8')))
 
