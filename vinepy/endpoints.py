@@ -357,14 +357,6 @@ ENDPOINTS = {
         'optional_params': OPTIONAL_PARAMS,
         'model': PostCollection
     },
-    'get_trending_timeline': {
-        'endpoint': 'timelines/trending',
-        'request_type': 'get',
-        'url_params': [],
-        'required_params': [],
-        'optional_params': OPTIONAL_PARAMS,
-        'model': PostCollection
-    },
     'get_promoted_timeline': {
         'endpoint': 'timelines/promoted',
         'request_type': 'get',
