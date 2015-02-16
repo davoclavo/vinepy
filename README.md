@@ -12,18 +12,19 @@ vinepy
 
 ## Installation
 
-From git
+From pip
 
-```sh
+```
+pip install vinepy
+```
+
+From source
+
+```
 git clone https://github.com/davoclavo/vinepy.git
 cd vinepy
 python setup.py install
-```
-
-Using pip
-
-```sh
-pip install vinepy
+pip install -r dev-requirements.txt
 ```
 
 ## Requirements
@@ -38,7 +39,7 @@ pip install vinepy
 * [vcrpy](https://github.com/kevin1024/vcrpy)
 
 
-## Usage
+## Examples
 
 ```python
 import vinepy
