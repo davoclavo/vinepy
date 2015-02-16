@@ -106,7 +106,7 @@ class TestModel(unittest.TestCase):
         self.assertEqual(repr(model), "<Model [%s] '%s'>" % (_id, '<Unknown>'.encode('utf8')))
 
         # Unicode name (emojis)
-        if sys.version_info.major == 3:
+        if sys.version_info[0] == 3:
             _description = 'Lmaoo\U0001f602'
         else:
             _description = u'Lmaoo\U0001f602'
