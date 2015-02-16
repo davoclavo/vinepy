@@ -1,5 +1,3 @@
-
-
 vinepy
 ======
 
@@ -23,8 +21,8 @@ From source
 ```
 git clone https://github.com/davoclavo/vinepy.git
 cd vinepy
-python setup.py install
 pip install -r dev-requirements.txt
+python setup.py install
 ```
 
 ## Requirements
