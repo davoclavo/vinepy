@@ -2,8 +2,9 @@ import vinepy
 
 
 def main():
-    vine = vinepy.API(username='bobtesty@suremail.info', password='password')
-    # user = vine.signup(username='Elgo', email='elgo@suremail.info', password='12345678')
+    vine = vinepy.API(username='something@yourmail.com', password='password')
+    # You can create a vine account 
+    # user = vine.signup(username='Your Name', email='something@yourmail.com', password='password')
     tag_timeline = vine.get_tag_timeline(tag_name='LNV')
 
     for post in tag_timeline:
