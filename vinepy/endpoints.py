@@ -207,6 +207,16 @@ ENDPOINTS = {
     },
 
     # Posts actions
+    'loops': {
+        'endpoint': 'loops',
+        'request_type': 'post',
+        'json': True,
+        'url_params': [],
+        'required_params': ['loops'],
+        'optional_params': [],
+        'default_params': [],
+        'model': None
+    },
     'like': {
         'endpoint': 'posts/%s/likes',
         'request_type': 'post',
